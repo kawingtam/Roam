@@ -54,3 +54,11 @@ assert.equal(parseAmount('12.50','USD'),1250);
 assert.equal(parseAmount('550','JPY'),550);
 for(const [amount,currency] of [['12.5','JPY'],['1.001','USD'],['','USD'],['-1','USD'],['Infinity','USD']])assert.throws(()=>parseAmount(amount,currency));
 console.log('PASS: currency precision and invalid amounts.');
+
+const statsJS=ts.transpileModule(readFileSync('app/trip-stats.ts','utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
+const {tripStats}=await import('data:text/javascript;base64,'+Buffer.from(statsJS).toString('base64'));
+const entries=[{amount:550,currency:'JPY',category:'Food',date:'2026-11-08'},{amount:1200,currency:'JPY',category:'Transport',date:'2026-11-08'},{amount:9800,currency:'JPY',category:'Stay',date:'2026-11-07'},{amount:1250,currency:'USD',category:'Food',date:'2026-11-08'}];
+assert.deepEqual(tripStats(entries,'JPY','2026-11-08'),{total:11550,todayTotal:1750,topCategory:'Stay',topAmount:9800,count:3});
+assert.equal(tripStats(entries,'USD','2026-11-08').total,1250);
+assert.deepEqual(tripStats([],'USD','2026-11-08'),{total:0,todayTotal:0,topCategory:'',topAmount:0,count:0});
+console.log('PASS: dashboard totals, highest category, today, empty states and currency isolation.');

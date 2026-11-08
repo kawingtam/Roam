@@ -53,3 +53,7 @@ Expected totals: JPY 13,050 and USD 12.50, shown separately. Filter Food to see 
 Home has exactly two actions: Add expense and View trips. Add expense opens receipt capture directly when there is one trip, asks which trip when there are several, or offers Create/Join when there are none. A trip opens to Add expense / View expenses. Totals, exports, trip details, invitations and sync/account actions are revealed only when requested. New trips require a name; dates, destination and currency keep defaults behind optional details.
 
 Expense entry now has five screens: receipt → amount → category → description (Next or Skip) → save. The trip name is shown prominently on every screen. Skip clears the description; Back preserves other input.
+
+## Dashboard and quick add
+
+The mobile layout uses Home / Add / More bottom navigation. Home remembers the chosen trip on this device; otherwise it selects a trip covering today, or the first trip. Spending, today's total and highest category use the chosen currency only. The dashboard contains only the signed-in traveler's expenses, not other members' spending. Recent entries keep their original currencies. Add uses category icons, then receipt → amount → description (skippable) → save, without asking the category again. Category and date can be edited at review.
