@@ -47,3 +47,7 @@ Create a trip named **Japan test**, destination **Kyoto**, default currency **JP
 | 12.50 | USD | Food | Airport snack |
 
 Expected totals: JPY 13,050 and USD 12.50, shown separately. Filter Food to see JPY 550 and USD 12.50. For an offline check, open the app online, enable airplane mode, add JPY 300 in Food with an optional photo, save, close and reopen, then reconnect and use Sync now. The JPY total becomes 13,350. No sample data is inserted into your account automatically.
+
+## Navigation
+
+Home has exactly two actions: Add expense and View trips. Add expense opens receipt capture directly when there is one trip, asks which trip when there are several, or offers Create/Join when there are none. A trip opens to Add expense / View expenses. Totals, exports, trip details, invitations and sync/account actions are revealed only when requested. New trips require a name; dates, destination and currency keep defaults behind optional details.
