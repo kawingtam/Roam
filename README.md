@@ -51,3 +51,5 @@ Expected totals: JPY 13,050 and USD 12.50, shown separately. Filter Food to see 
 ## Navigation
 
 Home has exactly two actions: Add expense and View trips. Add expense opens receipt capture directly when there is one trip, asks which trip when there are several, or offers Create/Join when there are none. A trip opens to Add expense / View expenses. Totals, exports, trip details, invitations and sync/account actions are revealed only when requested. New trips require a name; dates, destination and currency keep defaults behind optional details.
+
+Expense entry now has five screens: receipt → amount → category → description (Next or Skip) → save. The trip name is shown prominently on every screen. Skip clears the description; Back preserves other input.
