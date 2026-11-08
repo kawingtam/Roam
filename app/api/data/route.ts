@@ -6,8 +6,9 @@ async function access(trip:string,user:string){return env.DB!.prepare('SELECT id
 export async function GET(){
  const u=await getChatGPTUser();if(!u)return json({error:'Please sign in online.'},401);
  const trips=await env.DB!.prepare('SELECT t.*, (SELECT COUNT(*) FROM members m WHERE m.trip=t.id) AS travelers FROM trips t JOIN members m ON m.trip=t.id WHERE m.user=? ORDER BY t.created DESC').bind(u.userId).all();
- const expenses=await env.DB!.prepare('SELECT * FROM expenses WHERE user=? ORDER BY date DESC').bind(u.userId).all();
- return json({user:{id:u.userId,name:u.displayName},trips:trips.results,expenses:expenses.results});
+ const expenses=await env.DB!.prepare('SELECT e.* FROM expenses e JOIN members m ON m.trip=e.trip WHERE m.user=? ORDER BY e.date DESC,e.updated DESC').bind(u.userId).all();
+ const categories=await env.DB!.prepare('SELECT c.* FROM categories c JOIN members m ON m.trip=c.trip WHERE m.user=?').bind(u.userId).all();
+ return json({user:{id:u.userId,name:u.displayName},trips:trips.results,expenses:expenses.results,categories:categories.results});
 }
 export async function POST(req:Request){
  const u=await getChatGPTUser();if(!u)return json({error:'Please sign in online to sync.'},401);
@@ -29,11 +30,19 @@ export async function POST(req:Request){
  const invite=await env.DB!.prepare('SELECT * FROM invites WHERE id=? AND expires>?').bind(await digest(b.token),Date.now()).first();if(!invite)return json({error:'Invitation expired or invalid. Ask for a new link.'},404);
  await env.DB!.prepare('INSERT OR IGNORE INTO members VALUES(?,?,?)').bind(invite.trip+':'+u.userId,invite.trip,u.userId).run();return json({ok:true,trip:invite.trip});
  }
- if(b.action==='expense'){
- if(typeof b.id!=='string'||!/^[\w-]{8,80}$/.test(b.id)||!Number.isSafeInteger(b.amount)||b.amount<=0||b.amount>999999999999||!/^[A-Z]{3}$/.test(b.currency)||!['Food','Transport','Stay','Shopping','Activities','Other'].includes(b.category)||typeof b.description!=='string'||b.description.length>500||!/^\d{4}-\d{2}-\d{2}$/.test(b.date))return json({error:'Check the amount, currency, category and date.'},400);
+ if(b.action==='category'){
+ if(typeof b.id!=='string'||!/^[\w-]{8,80}$/.test(b.id)||typeof b.name!=='string'||!b.name.trim()||b.name.trim().length>32||/[\u0000-\u001f]/.test(b.name))return json({error:'Use a category name of 1–32 characters.'},400);
  if(!await access(b.trip,u.userId))return json({error:'You do not belong to this trip.'},403);
- const old=await env.DB!.prepare('SELECT user FROM expenses WHERE id=?').bind(b.id).first();if(old&&old.user!==u.userId)return json({error:'This expense is private.'},403);
- await env.DB!.prepare('INSERT INTO expenses(id,trip,user,amount,currency,category,description,date,updated) VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET amount=excluded.amount,currency=excluded.currency,category=excluded.category,description=excluded.description,date=excluded.date,updated=excluded.updated').bind(b.id,b.trip,u.userId,b.amount,b.currency,b.category,b.description,b.date,Date.now()).run();return json({ok:true});
+ const name=b.name.trim();const old=await env.DB!.prepare('SELECT trip,name FROM categories WHERE id=?').bind(b.id).first();if(old&&(old.trip!==b.trip||old.name!==name))return json({error:'Category ID already in use.'},409);
+ await env.DB!.prepare('INSERT OR IGNORE INTO categories(id,trip,name,key,creator) VALUES(?,?,?,?,?)').bind(b.id,b.trip,name,b.trip+':'+name.toLowerCase(),u.userId).run();return json({ok:true});
+ }
+ if(b.action==='expense'){
+ if(typeof b.id!=='string'||!/^[\w-]{8,80}$/.test(b.id)||!Number.isSafeInteger(b.amount)||b.amount<=0||b.amount>999999999999||!/^[A-Z]{3}$/.test(b.currency)||(typeof b.category!=='string'||!b.category.trim()||b.category.length>32)||typeof b.description!=='string'||b.description.length>500||!/^\d{4}-\d{2}-\d{2}$/.test(b.date))return json({error:'Check the amount, currency, category and date.'},400);
+ if(!await access(b.trip,u.userId))return json({error:'You do not belong to this trip.'},403);
+ const builtIn=['Food','Transport','Stay','Shopping','Activities','Other'].find(c=>c.toLowerCase()===b.category.toLowerCase());if(builtIn)b.category=builtIn;else{const custom=await env.DB!.prepare('SELECT name FROM categories WHERE trip=? AND lower(name)=lower(?)').bind(b.trip,b.category).first();if(!custom)return json({error:'Create this category in the trip first.'},400);b.category=custom.name;}
+ const old=await env.DB!.prepare('SELECT user,trip FROM expenses WHERE id=?').bind(b.id).first();if(old&&old.user!==u.userId)return json({error:'Only the expense creator can edit it.'},403);
+ if(old&&old.trip!==b.trip)return json({error:'An expense cannot be moved to another trip.'},409);
+ await env.DB!.prepare('INSERT INTO expenses(id,trip,user,amount,currency,category,description,date,updated,authorName) VALUES(?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET amount=excluded.amount,currency=excluded.currency,category=excluded.category,description=excluded.description,date=excluded.date,updated=excluded.updated,authorName=excluded.authorName WHERE expenses.user=excluded.user').bind(b.id,b.trip,u.userId,b.amount,b.currency,b.category,b.description,b.date,Date.now(),u.displayName).run();return json({ok:true});
  }
  return json({error:'Unknown action.'},400);
  }catch{return json({error:'Could not save. Your local entry is kept; try again.'},500);}

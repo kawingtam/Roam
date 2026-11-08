@@ -1,59 +1,43 @@
 # Roam — travel expenses
 
-An initial personal pilot with accounts, trips, expiring invitation links, private expenses, receipt photos, local-first capture, filters and CSV export.
+Mobile travel expense tracker: Home / Add / More, offline capture, shared trips, private account sign-in, receipts, custom trip categories, detail pages, filters and CSV exports.
 
-## Access model
+## Access
 
-Hosted sign-in is handled by Sites / ChatGPT, not a custom username/password service. The deployment starts owner-private. A trip invitation grants membership inside the application; it does not grant permission to visit the owner-private Site. Additional travelers must separately receive Site access before invitations work for them. No invitations are emailed automatically.
+Sites / ChatGPT handles sign-in. The Site starts owner-private; trip invitations create in-app membership and do not grant permission to open the private Site. Other travelers also need Site access. Invitation links last seven days; only trip creators generate them.
 
-Trip members see trip details and traveler count. Expenses and receipt files are visible only to their author, including against direct API requests. Invitation links can be used by multiple app visitors for seven days. Only the creator can generate links. Role administration, invitation revocation and shared expense visibility are not implemented.
+Every trip member can read all expenses and receipt images in that trip, including records created before shared viewing was introduced. Only the original expense creator can edit the record or replace its receipt. Even the trip creator cannot edit someone else's expense. Server routes enforce membership and ownership; hiding an Edit button is only presentation. Nonmembers cannot fetch trip expenses or receipt images. Older expense records without an author display name show “Trip member” to other users; ownership still uses the stored account ID.
 
-## Offline use
-
-Open and sign in online first, let the page finish preparing, then add to the home screen. The service worker caches the app shell and loaded assets. IndexedDB keeps trips, expense records, compressed receipt blobs and pending upload state under the account ID. An entry is reported saved only after its local transaction completes. Sync runs on opening, reconnecting, focusing the app, or pressing Sync now. The application does not promise background uploads while closed.
-
-Receipts are resized to at most 1800px and converted to JPEG, then uploaded to private R2 storage. A pending record remains pending until its receipt also uploads. Stable record IDs make retries idempotent. Existing expense edits across devices use last-write-wins. Avoid editing the same account in multiple tabs: cross-tab merge handling is deferred.
-
-Browser storage can be cleared or evicted; local-only records are not a backup. Sync before signing out, clearing site data or changing devices. Device data remains stored for offline use and is isolated by account ID; use on a trusted personal device. Sign out clears offline shell caches and is blocked while uploads remain pending.
-
-Currencies use their standard decimal precision, including zero-decimal JPY and KRW. Values are stored as integer minor units. Totals stay separated by original currency. No exchange-rate conversion.
-
-## Development
-
-Use Node >=22.13. Run the Sites installation and build helpers described by the supplied scripts. Generate schema migrations with `npm run db:generate`; run `node tests/access.mjs` for API isolation and retry checks and `npx tsc --noEmit` for type checks. Apply generated SQL to the local DB via Wrangler before previewing. Hosted migrations are applied during publication.
-
-Before relying on the pilot during travel, test home-screen install, photo capture, airplane-mode save, full app close and reopen, reconnection, and a second authorized account on actual iPhone and Android devices. Automated checks and desktop browser checks do not replace these device checks.
-
-## GitHub and hosting
-
-The source checkout is `/Users/k/Desktop/Github/travel-ledger`. This move does not create or upload a GitHub repository. Use a private GitHub repository for source. The existing origin remote belongs to Sites publication; preserve it and add GitHub as a second remote if desired. Never commit receipts, live exports, local databases, `.wrangler`, `work`, `.env` files or credentials. Runtime data lives in private D1/R2 storage, separate from Git.
-
-GitHub Pages serves static files and cannot run this application's current server routes. Keeping the code on GitHub and running the app on Sites is the smallest option. A future GitHub Pages deployment needs a separately hosted authentication/API/database/storage backend and a change from Sites-specific sign-in; publishing the current files to Pages will not provide a working secure app. A private repository does not automatically make its Pages website private.
-
-## Minimal expense entry
-
-Receipt (optional) → amount and currency → category → save with an optional note/date. Each screen keeps its values when going back. Only the final Save writes the expense to device storage. Cancel asks before discarding changed inputs.
-
-## Examples to enter manually
-
-Create a trip named **Japan test**, destination **Kyoto**, default currency **JPY**. Use your travel dates or today's date for both.
-
-| Amount | Currency | Category | Note |
-| --- | --- | --- | --- |
-| 550 | JPY | Food | Coffee near the station |
-| 1200 | JPY | Transport | Airport train |
-| 9800 | JPY | Stay | One night hotel |
-| 1500 | JPY | Activities | Museum tickets |
-| 12.50 | USD | Food | Airport snack |
-
-Expected totals: JPY 13,050 and USD 12.50, shown separately. Filter Food to see JPY 550 and USD 12.50. For an offline check, open the app online, enable airplane mode, add JPY 300 in Food with an optional photo, save, close and reopen, then reconnect and use Sync now. The JPY total becomes 13,350. No sample data is inserted into your account automatically.
+Custom categories belong to a trip and are visible to its members. Any member can add a category. Category renaming/deletion and membership removal screens are not implemented.
 
 ## Navigation
 
-Home has exactly two actions: Add expense and View trips. Add expense opens receipt capture directly when there is one trip, asks which trip when there are several, or offers Create/Join when there are none. A trip opens to Add expense / View expenses. Totals, exports, trip details, invitations and sync/account actions are revealed only when requested. New trips require a name; dates, destination and currency keep defaults behind optional details.
+Home ranks categories by total spending in the displayed currency. Tap a category to open its filtered list, View all for every expense, or Trip details for destination, dates, member count and separate currency totals. Expense lists filter by category, currency, traveler, date range and description search. CSV exports match the filters.
 
-Expense entry now has five screens: receipt → amount → category → description (Next or Skip) → save. The trip name is shown prominently on every screen. Skip clears the description; Back preserves other input.
+Tap an expense for amount, category, description, date, author, sync status and receipt. Your own entries have Edit expense. Edits start with the amount, retain the existing values, and allow category/date/receipt changes at review.
 
-## Dashboard and quick add
+Add uses category icons. Add category creates another category for the selected trip. New entry is receipt → amount → description (Next or Skip) → save. Entry uses the same rounded, pale green cards, pill buttons, typography and background as Home.
 
-The mobile layout uses Home / Add / More bottom navigation. Home remembers the chosen trip on this device; otherwise it selects a trip covering today, or the first trip. Spending, today's total and highest category use the chosen currency only. The dashboard contains only the signed-in traveler's expenses, not other members' spending. Recent entries keep their original currencies. Add uses category icons, then receipt → amount → description (skippable) → save, without asking the category again. Category and date can be edited at review.
+## Data and offline behavior
+
+IndexedDB keeps records and pending compressed receipt blobs under account-specific keys. Saving is reported only after the local transaction completes. Trips and categories sync before dependent expenses. Stable IDs make retries idempotent. Pending state remains until the receipt upload also succeeds. New categories can be created offline, including on a locally created trip.
+
+Structured records sync to D1; receipt files upload to private R2 storage. Shared data refreshes on opening, reconnecting, focusing the app or manual Sync now. Uploads are not promised while the app is closed. Saved online receipt images are fetched on demand and are not automatically cached for offline viewing. Previously synced trip records can be reviewed offline.
+
+Browser storage can be cleared or evicted; unsynced entries are not a backup. Sign-out is blocked while uploads remain pending and clears the offline shell cache. Local account data remains on the trusted device for offline use, isolated by account ID; it is not encrypted by this application. Existing downloaded copies cannot be revoked from an offline device. Same-expense edits across devices use last-write-wins; cross-tab merging is not implemented.
+
+Currencies use integer minor units with the currency's standard precision. Totals and category rankings stay separated by currency; no exchange-rate conversion. Dashboard totals include all trip members' expenses.
+
+## Source and hosting
+
+Checkout: `/Users/k/Desktop/Github/travel-ledger`. Moving the folder did not create a GitHub repository. Use a private GitHub repository for source; preserve the Sites publication remote. Never commit personal receipts, exports, databases, `.wrangler`, `work`, `.env` files or credentials. Runtime data is separate from Git.
+
+GitHub Pages cannot run the current server routes. Hosting there would require a separate authentication/API/database/storage backend and changes to Sites-specific sign-in.
+
+## Development and checks
+
+Use Node >=22.13 and the supplied Sites build workflow. Generate schema migrations with `npm run db:generate`; commit generated SQL and metadata. Apply each new migration once to the local D1 database before previewing. Publication applies hosted migrations. Do not replay previously applied SQL.
+
+Run `node tests/access.mjs` for shared reads, creator-only writes, receipt access, outsider isolation, custom categories, retries, money precision and category ranking. Run `node node_modules/typescript/bin/tsc --noEmit` for type checks. Use the built Worker preview for visual QA.
+
+Test offline capture/reopen/reconnect on actual iPhone and Android devices before relying on the app during travel; desktop checks do not replace device checks.

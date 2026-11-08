@@ -8,6 +8,13 @@
       "when": 1794123779003,
       "tag": "0000_nasty_eternals",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1794127155483,
+      "tag": "0001_living_medusa",
+      "breakpoints": true
     }
   ]
 }
