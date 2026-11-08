@@ -47,3 +47,10 @@ assert.equal((await api.POST(new Request('https://roam.test/api/data',{method:'P
 db.prepare('UPDATE invites SET expires=0').run();assert.equal((await post({action:'join',token:invited.token})).status,404);
 globalThis.__user=null;assert.equal((await api.GET()).status,401);assert.equal((await post(trip)).status,401);
 console.log('PASS: account isolation, membership, private receipt access, invite expiry, validation, origin checks, retry idempotency.');
+
+const moneyJS=ts.transpileModule(readFileSync('app/money.ts','utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
+const {parseAmount}=await import('data:text/javascript;base64,'+Buffer.from(moneyJS).toString('base64'));
+assert.equal(parseAmount('12.50','USD'),1250);
+assert.equal(parseAmount('550','JPY'),550);
+for(const [amount,currency] of [['12.5','JPY'],['1.001','USD'],['','USD'],['-1','USD'],['Infinity','USD']])assert.throws(()=>parseAmount(amount,currency));
+console.log('PASS: currency precision and invalid amounts.');

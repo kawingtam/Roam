@@ -43,3 +43,10 @@ yarn-error.log*
 
 # OS metadata
 .DS_Store
+
+# Personal expense data and exports
+*.sqlite
+*.sqlite3
+*.db
+/receipts/
+/exports/
