@@ -12,6 +12,8 @@ A calm, mobile-first way to keep track of travel spending — from your first co
 
 </div>
 
+> 🛠️ A full GitHub Pages app with separate Supabase accounts and storage is being prepared on the `github-pages-app` branch. The current public link remains the sample preview until the private backend and existing data transfer are verified. See [migration setup](supabase/SETUP.md).
+
 ---
 
 ## ✨ Meet Roam
@@ -143,6 +145,8 @@ travel-ledger/
 ├── db/                  # Database schema
 ├── drizzle/             # Database migrations
 ├── docs/                # Public preview with sample data
+├── web/                 # Full GitHub Pages app (migration in progress)
+├── supabase/            # Private backend schema & migration guide
 ├── public/              # App icons, manifest & offline worker
 ├── tests/               # Permissions, sync rules & data checks
 ├── DEVELOPMENT.md       # Setup, storage & implementation notes
