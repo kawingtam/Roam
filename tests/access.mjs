@@ -25,6 +25,15 @@ async function load(path){const source=readFileSync(path,'utf8').replace(/import
 const api=await load('app/api/data/route.ts'),receipt=await load('app/api/receipt/route.ts');
 const request=body=>new Request('https://roam.test/api/data',{method:'POST',headers:{Origin:'https://roam.test','Content-Type':'application/json'},body:JSON.stringify(body)});
 const post=body=>api.POST(request(body));
+// Anonymous visitors must never read or write trip data or receipt files.
+const signedInUser=globalThis.__user;globalThis.__user=null;
+assert.equal((await api.GET()).status,401);
+assert.equal((await post({action:'trip'})).status,401);
+assert.equal((await receipt.GET(new Request('https://roam.test/api/receipt?id=private-expense'))).status,401);
+assert.equal((await receipt.POST(new Request('https://roam.test/api/receipt?id=private-expense',{method:'POST'}))).status,401);
+globalThis.__user=signedInUser;
+console.log('PASS: login required for database and receipt reads/writes.');
+
 const trip={action:'trip',id:'trip-123456',name:'Japan',destination:'Kyoto',currency:'JPY',start:'2026-11-10',end:'2026-11-18'};
 assert.equal((await post(trip)).status,200);assert.equal((await post(trip)).status,200);
 assert.equal(db.prepare('SELECT COUNT(*) n FROM trips').get().n,1);

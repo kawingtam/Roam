@@ -30,7 +30,7 @@ Currencies use integer minor units with the currency's standard precision. Origi
 
 ## Source and hosting
 
-Checkout: `/Users/k/Desktop/Github/travel-ledger`. Moving the folder did not create a GitHub repository. Use a private GitHub repository for source; preserve the Sites publication remote. Never commit personal receipts, exports, databases, `.wrangler`, `work`, `.env` files or credentials. Runtime data is separate from Git.
+GitHub contains the application source and a static public preview in `docs/`. The working app is hosted separately on Sites; preserve the Sites publication workflow. A public source repository does not make the database public. Never commit personal receipts, exports, databases, `.wrangler`, `work`, `.env` files or credentials. Runtime data is separate from Git.
 
 GitHub Pages cannot run the current server routes. Hosting there would require a separate authentication/API/database/storage backend and changes to Sites-specific sign-in.
 
@@ -44,7 +44,7 @@ Test offline capture/reopen/reconnect on actual iPhone and Android devices befor
 
 ## Reference-style overview and entry
 
-Home uses a native CSS donut chart and spending-ranked category legend, with the selected currency kept explicit and Trip details above the chart. Amount entry has a large currency symbol/number and an always-visible currency selector. The final save screen exposes category, date, note and optional receipt as compact rows. The separate skippable description page and shared-trip access rules remain. Successful saves show the amount and trip with Add another / Done actions. Bottom navigation remains Home / Add / More.
+Home uses a native CSS donut chart and spending-ranked category legend, with the selected currency kept explicit and Trip details above the chart. Amount entry has a large currency symbol/number and an always-visible currency selector. The final save screen exposes category, date, note and optional receipt as compact rows. The separate skippable description page and shared-trip access rules remain. Successful saves show the amount with Add another / Done actions. Bottom navigation remains Home / Add / More.
 
 ## Rates, deletion and restore
 
@@ -57,3 +57,18 @@ Home totals, expense-list totals and search are always visible. More menu rows s
 ## Latest mobile refinements
 
 Add / Edit categories offers 16 icons and shared category name editing. Default category positions stay stable when renamed. Home is compact with a maximum of three category rows and no exchange-rate wording. The current trip name opens its details directly. Trip details shows whole-trip converted USD and travel-currency totals; individual expense values stay in their original currency. The Add photo control is a real button with visible text; the saved screen no longer repeats the trip name. More uses the label Invite and has no restore menu. Home was checked at 390×844, 375×667 and 320×568 with no vertical overflow.
+
+## Public preview and private application
+
+The GitHub Pages preview in `docs/` contains invented sample values only. It has no database connection, accepts no expense entries, and does not store or upload visitor information. Open app leads to the separately hosted application, where Sites / ChatGPT supplies authentication. The public preview is not a substitute for a user's trip account.
+
+| Location | Contents | Access |
+| --- | --- | --- |
+| GitHub repository / Pages | Source, schema migrations, static demo | Public |
+| Cloudflare D1 through Sites | Trips, memberships, expenses, category names/icons, hashed invitation tokens | Authenticated server routes; trip members only |
+| Cloudflare R2 through Sites | Receipt images | Authenticated receipt route; trip members only |
+| Browser IndexedDB | Account-specific offline records and pending photos | Local device storage |
+
+GitHub Pages cannot execute this app's API or provide its authentication. Keep the working app on Sites with D1/R2. Do not deploy the Worker directly to an unprotected origin: its identity headers are trusted only behind the Sites authentication gateway. Inviting a traveler to a trip does not change the Site's owner-private access policy; the owner must separately grant Site access before that traveler can open it.
+
+Tests use an in-memory database and invented accounts. No production expense data is needed to build, preview, or test this repository. Deleted entries are marked deleted for reliable offline synchronization; deletion does not purge the stored record or its receipt file. Do not describe the current delete action as permanent erasure.
