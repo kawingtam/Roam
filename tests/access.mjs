@@ -21,7 +21,7 @@ globalThis.__env={
  BUCKET:{async put(){},async get(){return null;}}
 };
 globalThis.__user={userId:'alice',displayName:'Alice',email:'alice@example.test'};
-async function load(path){const source=readFileSync(path,'utf8').replace(/import \{ env \} from 'cloudflare:workers';/, 'const env=globalThis.__env;').replace(/import \{ getChatGPTUser \} from '..\/..\/chatgpt-auth';/,'const getChatGPTUser=async()=>globalThis.__user;');const js=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;return import('data:text/javascript;base64,'+Buffer.from(js).toString('base64'));}
+async function load(path){const source=readFileSync(path,'utf8').replace(/import \{ env \} from 'cloudflare:workers';/, 'const env=globalThis.__env;').replace(/import\s*\{\s*getChatGPTUser\s*\}\s*from '..\/..\/chatgpt-auth';/,'const getChatGPTUser=async()=>globalThis.__user;');const js=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;return import('data:text/javascript;base64,'+Buffer.from(js).toString('base64'));}
 const api=await load('app/api/data/route.ts'),receipt=await load('app/api/receipt/route.ts');
 const request=body=>new Request('https://roam.test/api/data',{method:'POST',headers:{Origin:'https://roam.test','Content-Type':'application/json'},body:JSON.stringify(body)});
 const post=body=>api.POST(request(body));
@@ -68,6 +68,23 @@ const alice=await (await api.GET()).json();assert.equal(alice.expenses.length,3)
 assert.equal((await post({...expense,amount:800})).status,200);
 assert.equal(db.prepare('SELECT amount FROM expenses WHERE id=?').get(expense.id).amount,800);
 assert.equal((await post({...expense,id:'expense-bob1',amount:1})).status,403);
+globalThis.__user={userId:'bob',displayName:'Bob',email:'bob@example.test'};
+assert.equal((await post({action:'delete',id:expense.id})).status,403);
+assert.equal((await post({action:'restore',id:expense.id})).status,403);
+globalThis.__user={userId:'alice',displayName:'Alice',email:'alice@example.test'};
+assert.equal((await post({action:'delete',id:expense.id})).status,200);
+assert.equal((await post({action:'delete',id:expense.id})).status,200);
+assert.equal((await post({...expense,amount:900})).status,409);
+assert.equal((await (await post({...expense,deleting:true})).json()).deleted,true);
+assert.equal((await receipt.GET(new Request('https://roam.test/api/receipt?id='+expense.id))).status,404);
+assert.equal((await (await api.GET()).json()).expenses.find(e=>e.id===expense.id).deleted,1);
+globalThis.__user={userId:'bob',displayName:'Bob',email:'bob@example.test'};
+assert.ok(!(await (await api.GET()).json()).expenses.some(e=>e.id===expense.id));
+globalThis.__user={userId:'alice',displayName:'Alice',email:'alice@example.test'};
+assert.equal((await post({action:'restore',id:expense.id})).status,200);
+assert.equal((await receipt.GET(new Request('https://roam.test/api/receipt?id='+expense.id))).status,200);
+assert.equal((await post({action:'restore',id:'not-yet-synced'})).status,200);
+console.log('PASS: creator-only deletion/restoration, member visibility, receipt access and retry safety.');
 db.prepare('UPDATE invites SET expires=0').run();assert.equal((await post({action:'join',token:invited.token})).status,404);
 globalThis.__user=null;assert.equal((await api.GET()).status,401);assert.equal((await post(trip)).status,401);
 console.log('PASS: shared trip reads, creator-only edits/uploads, outsider isolation, categories, validation, invite expiry, retries.');
@@ -92,3 +109,29 @@ assert.deepEqual(categorySpending(entries,'JPY').map(c=>c.name),['Stay','Transpo
 assert.equal(categorySpending(entries,'USD')[0].amount,1250);
 assert.equal(categorySpending([{amount:2,currency:'USD',category:'__proto__',date:'2026-11-08'}],'USD')[0].amount,2);
 console.log('PASS: category ranking, currency isolation and safe custom category names.');
+
+const helperSource=readFileSync('app/expense-utils.ts','utf8').replace("'./money'",JSON.stringify('data:text/javascript;base64,'+Buffer.from(moneyJS).toString('base64')));
+const helperJS=ts.transpileModule(helperSource,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
+const {matchesExpenseSearch,convertTripEntries,isFxSnapshot}=await import('data:text/javascript;base64,'+Buffer.from(helperJS).toString('base64'));
+const lunch={amount:2850,currency:'USD',category:'Food',description:'Lunch near the station'};
+for(const q of ['28.50','$28.50','28.5','food','lunch','food lunch 28.50',''])assert.equal(matchesExpenseSearch(lunch,q),true);
+assert.equal(matchesExpenseSearch(lunch,'train'),false);
+assert.equal(matchesExpenseSearch({amount:1200,currency:'JPY',category:'Transport'},'1,200'),true);
+const originals=[{amount:15000,currency:'JPY',category:'Food'},{amount:1234,currency:'USD',category:'Stay'}];
+const fx={USD:1,JPY:150,EUR:0.9};
+assert.equal(convertTripEntries(originals,'USD',fx).entries.reduce((n,e)=>n+e.amount,0),11234);
+assert.equal(convertTripEntries(originals,'JPY',fx).entries.reduce((n,e)=>n+e.amount,0),16851);
+assert.equal(originals[0].currency,'JPY');
+assert.deepEqual(convertTripEntries(originals,'USD').missing,['JPY']);
+assert.ok(isFxSnapshot({rates:fx,dates:{JPY:'2026-11-08'},fetchedAt:Date.now()}));
+assert.equal(isFxSnapshot({rates:{USD:1,JPY:-1},dates:{},fetchedAt:0}),false);
+console.log('PASS: always-on search fields, currency conversion, source preservation and unavailable-rate handling.');
+const rateAPI=await load('app/api/rates/route.ts');
+globalThis.__user=null;assert.equal((await rateAPI.GET()).status,401);
+globalThis.__user={userId:'alice',displayName:'Alice',email:'alice@example.test'};
+const originalFetch=globalThis.fetch;
+globalThis.fetch=async()=>Response.json([{date:'2026-11-08',base:'USD',quote:'JPY',rate:150}]);
+const rateResponse=await rateAPI.GET();assert.equal(rateResponse.status,200);assert.equal((await rateResponse.json()).rates.JPY,150);
+globalThis.fetch=async()=>{throw new Error('offline');};assert.equal((await rateAPI.GET()).status,502);
+globalThis.fetch=originalFetch;
+console.log('PASS: exchange-rate API authentication, validation and network failure handling.');

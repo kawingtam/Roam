@@ -1,0 +1,1 @@
+ALTER TABLE `expenses` ADD `deleted` integer DEFAULT 0 NOT NULL;

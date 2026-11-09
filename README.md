@@ -12,7 +12,7 @@ Custom categories belong to a trip and are visible to its members. Any member ca
 
 ## Navigation
 
-Home ranks categories by total spending in the displayed currency. Tap a category to open its filtered list, View all for every expense, or Trip details for destination, dates, member count and separate currency totals. Expense lists filter by category, currency, traveler, date range and description search. CSV exports match the filters.
+Home ranks categories by total spending in the displayed currency. Tap a category to open its filtered list, View all for every expense, or Trip details for destination, dates, member count and separate currency totals. Expense lists have one always-visible search field for amount, category and description. Original-currency totals and matching counts remain visible. Category drill-down pre-fills the search; CSV exports match the search.
 
 Tap an expense for amount, category, description, date, author, sync status and receipt. Your own entries have Edit expense. Edits start with the amount, retain the existing values, and allow category/date/receipt changes at review.
 
@@ -26,7 +26,7 @@ Structured records sync to D1; receipt files upload to private R2 storage. Share
 
 Browser storage can be cleared or evicted; unsynced entries are not a backup. Sign-out is blocked while uploads remain pending and clears the offline shell cache. Local account data remains on the trusted device for offline use, isolated by account ID; it is not encrypted by this application. Existing downloaded copies cannot be revoked from an offline device. Same-expense edits across devices use last-write-wins; cross-tab merging is not implemented.
 
-Currencies use integer minor units with the currency's standard precision. Totals and category rankings stay separated by currency; no exchange-rate conversion. Dashboard totals include all trip members' expenses.
+Currencies use integer minor units with the currency's standard precision. Original records keep their entered currency and amount. Home shows the full trip total converted into USD and the trip currency, with category rankings and the chart using the selected display currency. Frankfurter v2 supplies latest daily reference rates; this is an estimate rather than an intraday quote or a historical transaction rate. Both totals include all trip members' expenses.
 
 ## Source and hosting
 
@@ -45,3 +45,11 @@ Test offline capture/reopen/reconnect on actual iPhone and Android devices befor
 ## Reference-style overview and entry
 
 Home uses a native CSS donut chart and spending-ranked category legend, with the selected currency kept explicit and Trip details above the chart. Amount entry has a large currency symbol/number and an always-visible currency selector. The final save screen exposes category, date, note and optional receipt as compact rows. The separate skippable description page and shared-trip access rules remain. Successful saves show the amount and trip with Add another / Done actions. Bottom navigation remains Home / Add / More.
+
+## Rates, deletion and restore
+
+The signed-in `/api/rates` endpoint fetches daily USD-based reference rates from Frankfurter for the app's supported currencies. Only currency codes are sent; no expense amounts, receipts, trip names or identities are sent to the rate provider. Positive finite rates and their dates are validated. The browser stores the last successful rate snapshot for offline use, refreshes when opening/reconnecting/focusing if older than an hour, and offers Refresh rates. Source rate dates and saved-rate status are shown. Conversions never overwrite original expense amounts. If a rate is missing, the app reports it and shows original totals instead of pretending a partial total is complete.
+
+Only the expense creator can delete or restore their entry. Delete is reversible: a `deleted` flag removes it from shared lists and all totals; the creator can restore it from More → Deleted expenses for the selected trip. Receipts are retained but unavailable while deleted. Deleted metadata is returned only to its creator. Local pending deletion/restoration syncs with stable IDs and survives retries. There is no permanent purge action.
+
+Home totals, expense-list totals and search are always visible. More menu rows share one card style; Create a trip and Join a trip use matching buttons.
