@@ -4,3 +4,5 @@ export function parseAmount(value:string,currency:string){
  if(!value.trim()||!Number.isFinite(n)||minor<=0||minor>999999999999||Math.abs(n*scale-minor)>0.0001)throw new Error('Enter a valid amount for this currency.');
  return minor;
 }
+
+export const currencySymbol=(currency:string)=>new Intl.NumberFormat('en-US',{style:'currency',currency,currencyDisplay:'narrowSymbol'}).formatToParts(0).find(p=>p.type==='currency')?.value||currency;

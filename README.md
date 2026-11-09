@@ -41,3 +41,7 @@ Use Node >=22.13 and the supplied Sites build workflow. Generate schema migratio
 Run `node tests/access.mjs` for shared reads, creator-only writes, receipt access, outsider isolation, custom categories, retries, money precision and category ranking. Run `node node_modules/typescript/bin/tsc --noEmit` for type checks. Use the built Worker preview for visual QA.
 
 Test offline capture/reopen/reconnect on actual iPhone and Android devices before relying on the app during travel; desktop checks do not replace device checks.
+
+## Reference-style overview and entry
+
+Home uses a native CSS donut chart and spending-ranked category legend, with the selected currency kept explicit and Trip details above the chart. Amount entry has a large currency symbol/number and an always-visible currency selector. The final save screen exposes category, date, note and optional receipt as compact rows. The separate skippable description page and shared-trip access rules remain. Successful saves show the amount and trip with Add another / Done actions. Bottom navigation remains Home / Add / More.
