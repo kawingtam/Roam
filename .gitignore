@@ -50,3 +50,6 @@ yarn-error.log*
 *.db
 /receipts/
 /exports/
+
+# GitHub Pages build output
+/pages-dist/

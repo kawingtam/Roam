@@ -1,3 +1,7 @@
+# Current GitHub Pages deployment
+
+The current app is built from `web/` with `npm run build:pages`. Supabase handles authentication, database operations, and private receipt storage. Follow [supabase/SETUP.md](supabase/SETUP.md) for current setup and migration status. The notes below describe the previous Sites build, retained while existing data is transferred.
+
 # Roam — travel expenses
 
 Mobile travel expense tracker: Home / Add / More, offline capture, shared trips, private account sign-in, receipts, custom trip categories, detail pages, filters and CSV exports.
