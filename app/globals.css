@@ -29,5 +29,4 @@ body{background:#fcfcfa;color:#263b30}.app-header{height:62px;max-width:480px;bo
 @media(max-height:720px){.legend-name{font-size:13px}.legend-value>strong{font-size:12px}.legend-value>small{font-size:9px}.home-total-card>span{font-size:10px}}
 @media(max-height:620px){.legend-name{font-size:12px}.legend-value>strong{font-size:11px}.legend-value>small{font-size:8px}.home-total-card>span{font-size:9px}}
 
-/* Keep Home navigation close to its content instead of an empty screen away. */
-body:has(.overview-page) .bottom-nav{position:static;transform:none;margin:18px auto 0}.mobile-main:has(.overview-page){padding-bottom:0}.exchange-details{padding:14px 0;border-top:1px solid #e4eadd}.exchange-details p{margin-bottom:4px}.exchange-details .text-button{font-size:12px}
+.exchange-details{padding:14px 0;border-top:1px solid #e4eadd}.exchange-details p{margin-bottom:4px}.exchange-details .text-button{font-size:12px}
