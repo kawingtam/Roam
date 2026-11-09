@@ -1,74 +1,201 @@
-# Roam — travel expenses
+<div align="center">
 
-Mobile travel expense tracker: Home / Add / More, offline capture, shared trips, private account sign-in, receipts, custom trip categories, detail pages, filters and CSV exports.
+# 🌿 Roam — Travel Expense Tracker
 
-## Access
+### Little receipts. Lovely adventures. ✈️
 
-Sites / ChatGPT handles sign-in. The Site starts owner-private; trip invitations create in-app membership and do not grant permission to open the private Site. Other travelers also need Site access. Invitation links last seven days; only trip creators generate them.
+A calm, mobile-first way to keep track of travel spending — from your first coffee to your last souvenir.
 
-Every trip member can read all expenses and receipt images in that trip, including records created before shared viewing was introduced. Only the original expense creator can edit the record or replace its receipt. Even the trip creator cannot edit someone else's expense. Server routes enforce membership and ownership; hiding an Edit button is only presentation. Nonmembers cannot fetch trip expenses or receipt images. Older expense records without an author display name show “Trip member” to other users; ownership still uses the stored account ID.
+**Less time keeping receipts. More time making memories.**
 
-Custom categories belong to a trip and are visible to its members. Any member can add a category. Category names and icons are editable by any member. Renaming updates labels on existing expenses without changing their amounts or creator. Historic names are retained as aliases so older offline entries sync into the correct shared category. Category deletion and membership removal screens are not implemented.
+[🌷 Explore the Preview](https://kawingtam.github.io/travel-ledger/) · [🔐 Open the App](https://roam-travel-ledger.kawingtam.chatgpt.site/)
 
-## Navigation
+</div>
 
-Home shows the three highest-spending categories in the displayed currency and fits standard phone portrait sizes without scrolling. Tap View all for every expense. Tap a category to open its filtered list, View all for every expense, or Trip details for destination, dates, member count and separate currency totals. Expense lists have one always-visible search field for amount, category and description. Original-currency totals and matching counts remain visible. Category drill-down pre-fills the search; CSV exports match the search.
+---
 
-Tap an expense for amount, category, description, date, author, sync status and receipt. Your own entries have Edit expense. Edits start with the amount, retain the existing values, and allow category/date/receipt changes at review.
+## ✨ Meet Roam
 
-Add uses category icons. Add category creates another category for the selected trip. New entry is receipt → amount → description (Next or Skip) → save. Entry uses the same rounded, pale green cards, pill buttons, typography and background as Home.
+Travel comes with enough things to remember. Your expenses can be the easy part. 🧳
 
-## Data and offline behavior
+Roam brings receipts, categories, currencies, and shared trips into one simple place. Add an expense in a few small steps, check how your trip is going, and keep exploring — even when the connection disappears.
 
-IndexedDB keeps records and pending compressed receipt blobs under account-specific keys. Saving is reported only after the local transaction completes. Trips and categories sync before dependent expenses. Stable IDs make retries idempotent. Pending state remains until the receipt upload also succeeds. New categories can be created offline, including on a locally created trip.
+> soft greens · clear totals · tiny steps · room to breathe 🌿
 
-Structured records sync to D1; receipt files upload to private R2 storage. Shared data refreshes on opening, reconnecting, focusing the app or manual Sync now. Uploads are not promised while the app is closed. Saved online receipt images are fetched on demand and are not automatically cached for offline viewing. Previously synced trip records can be reviewed offline.
+The public preview uses **invented sample data**. The working app requires sign-in and currently has restricted Site access.
 
-Browser storage can be cleared or evicted; unsynced entries are not a backup. Sign-out is blocked while uploads remain pending and clears the offline shell cache. Local account data remains on the trusted device for offline use, isolated by account ID; it is not encrypted by this application. Existing downloaded copies cannot be revoked from an offline device. Same-expense edits across devices use last-write-wins; cross-tab merging is not implemented.
+---
 
-Currencies use integer minor units with the currency's standard precision. Original records keep their entered currency and amount. Home shows the full trip total converted into USD and the trip currency, with category rankings and the chart using the selected display currency. Frankfurter v2 supplies latest daily reference rates; this is an estimate rather than an intraday quote or a historical transaction rate. Both totals include all trip members' expenses.
+## 🌸 Project Highlights
 
-## Source and hosting
+- 📱 **Made for mobile** — a minimal interface designed for phone browsers
+- 🧾 **Receipts, together** — attach a photo to an expense
+- 🪄 **One step at a time** — receipt, amount, optional description, then save
+- 🧳 **Shared trips** — keep travel companions looking at the same expenses
+- 🎨 **Your own categories** — choose names and icons, shared across the trip
+- 🌍 **Two currency views** — see spending in USD and your trip currency
+- 🌱 **Offline capture** — save on your device and sync when connected
+- 🔎 **Easy review** — search by amount, category, or description
+- 🔐 **Account-based access** — trip data stays behind server-side permission checks
 
-GitHub contains the application source and a static public preview in `docs/`. The working app is hosted separately on Sites; preserve the Sites publication workflow. A public source repository does not make the database public. Never commit personal receipts, exports, databases, `.wrangler`, `work`, `.env` files or credentials. Runtime data is separate from Git.
+---
 
-GitHub Pages cannot run the current server routes. Hosting there would require a separate authentication/API/database/storage backend and changes to Sites-specific sign-in.
+## 🧭 A Little Tour
 
-## Development and checks
+Just three places to go:
 
-Use Node >=22.13 and the supplied Sites build workflow. Generate schema migrations with `npm run db:generate`; commit generated SQL and metadata. Apply each new migration once to the local D1 database before previewing. Publication applies hosted migrations. Do not replay previously applied SQL.
+| Screen | A Little Help With… |
+| --- | --- |
+| 🏡 **Home** | Current trip, currency totals, a spending chart, and your top three categories |
+| ➕ **Add** | Picking a category and recording an expense in simple steps |
+| 🌿 **More** | Trips, invitations, category settings, and account sync |
 
-Run `node tests/access.mjs` for shared reads, creator-only writes, receipt access, outsider isolation, custom categories, retries, money precision and category ranking. Run `node node_modules/typescript/bin/tsc --noEmit` for type checks. Use the built Worker preview for visual QA.
+Tap the current trip name for trip details. Tap a category to see its expenses. Open an entry to review its receipt and details.
 
-Test offline capture/reopen/reconnect on actual iPhone and Android devices before relying on the app during travel; desktop checks do not replace device checks.
+**Your own expense?** You can edit or delete it. Everyone else on the trip can view it. 🤝
 
-## Reference-style overview and entry
+---
 
-Home uses a native CSS donut chart and spending-ranked category legend, with the selected currency kept explicit and Trip details above the chart. Amount entry has a large currency symbol/number and an always-visible currency selector. The final save screen exposes category, date, note and optional receipt as compact rows. The separate skippable description page and shared-trip access rules remain. Successful saves show the amount with Add another / Done actions. Bottom navigation remains Home / Add / More.
+## 🧾 From Receipt to Ready
 
-## Rates, deletion and restore
+```text
+Choose your trip & category 🧳
+              ↓
+Add a receipt photo 📸
+              ↓
+Enter the amount & currency 💰
+              ↓
+Add a description — or skip ✏️
+              ↓
+Review & save 🌷
+              ↓
+Sync when connected ☁️
+```
 
-The signed-in `/api/rates` endpoint fetches daily USD-based reference rates from Frankfurter for the app's supported currencies. Only currency codes are sent; no expense amounts, receipts, trip names or identities are sent to the rate provider. Positive finite rates and their dates are validated. The browser stores the last successful rate snapshot for offline use, refreshes when opening/reconnecting/focusing if older than an hour, and offers Refresh rates. Source rate dates and refresh controls are available in Trip details → Exchange rate. Conversions never overwrite original expense amounts. If a rate is missing, the app reports it and shows original totals instead of pretending a partial total is complete.
+No long form to work through. Just the next small step.
 
-Only the expense creator can delete or restore their entry. Delete is reversible: a `deleted` flag removes it from shared lists and all totals; restore controls have been removed. Tombstones remain for synchronization retry safety. The existing restore endpoint only remains compatible with actions already queued by older clients. Receipts are retained but unavailable while deleted. Deleted metadata is returned only to its creator. Local pending deletion/restoration syncs with stable IDs and survives retries. There is no permanent purge action.
+---
 
-Home totals, expense-list totals and search are always visible. More menu rows share one card style; Create a trip and Join a trip use matching buttons.
+## 🎨 The Look & Feel
 
-## Latest mobile refinements
+Roam is designed to feel like a quiet moment in a busy travel day.
 
-Add / Edit categories offers 16 icons and shared category name editing. Default category positions stay stable when renamed. Home is compact with a maximum of three category rows and no exchange-rate wording. The current trip name opens its details directly. Trip details shows whole-trip converted USD and travel-currency totals; individual expense values stay in their original currency. The Add photo control is a real button with visible text; the saved screen no longer repeats the trip name. More uses the label Invite and has no restore menu. Home was checked at 390×844, 375×667 and 320×568 with no vertical overflow.
+- 🌿 Soft green accents and light backgrounds
+- 🫧 Rounded cards and simple buttons
+- 🔤 Clear typography and readable amounts
+- 🧭 Consistent Home / Add / More navigation
+- 🪶 Enough detail to be useful, without filling every corner
 
-## Public preview and private application
+The goal: make the next action easy to find.
 
-The GitHub Pages preview in `docs/` contains invented sample values only. It has no database connection, accepts no expense entries, and does not store or upload visitor information. Open app leads to the separately hosted application, where Sites / ChatGPT supplies authentication. The public preview is not a substitute for a user's trip account.
+---
 
-| Location | Contents | Access |
-| --- | --- | --- |
-| GitHub repository / Pages | Source, schema migrations, static demo | Public |
-| Cloudflare D1 through Sites | Trips, memberships, expenses, category names/icons, hashed invitation tokens | Authenticated server routes; trip members only |
-| Cloudflare R2 through Sites | Receipt images | Authenticated receipt route; trip members only |
-| Browser IndexedDB | Account-specific offline records and pending photos | Local device storage |
+## 🔐 Your Adventures Aren’t Stored on GitHub
 
-GitHub Pages cannot execute this app's API or provide its authentication. Keep the working app on Sites with D1/R2. Do not deploy the Worker directly to an unprotected origin: its identity headers are trusted only behind the Sites authentication gateway. Inviting a traveler to a trip does not change the Site's owner-private access policy; the owner must separately grant Site access before that traveler can open it.
+The code is public. Your travel records are kept separately.
 
-Tests use an in-memory database and invented accounts. No production expense data is needed to build, preview, or test this repository. Deleted entries are marked deleted for reliable offline synchronization; deletion does not purge the stored record or its receipt file. Do not describe the current delete action as permanent erasure.
+| Where | What Lives There |
+| --- | --- |
+| 💻 **GitHub** | App source, database structure, and the sample preview |
+| ☁️ **Cloudflare D1** | Trips, members, categories, and expenses |
+| 🧾 **Cloudflare R2** | Receipt photos |
+| 📱 **Your device** | Offline records and photos waiting to sync |
+
+The working app uses **Sites / ChatGPT sign-in**. Trip members can view shared trip expenses and receipts; only the person who added an expense can edit or delete it. Category names and icons are shared with the whole trip.
+
+**A small access note:** the working Site is currently owner-private. A traveler needs Site access as well as a trip invitation. A GitHub account or a visit to the preview does not grant access to anyone’s trips.
+
+---
+
+## 🌦️ When the Connection Wanders
+
+An expense saves on your device first. When the app is open and connected, pending entries and receipts can sync to the online storage.
+
+Shared data refreshes when opening, reconnecting, returning to the app, or choosing **Sync now**. Continuous live updates and uploads while the app is closed are not implemented.
+
+> 🧳 Before clearing browser storage or changing devices, check that your entries show **Synced**. Unsynced records exist only on that device.
+
+Currency conversions use daily reference rates. Your original amounts and currencies stay unchanged.
+
+---
+
+## 🛠️ Built With
+
+| Technology | Its Little Job |
+| --- | --- |
+| **React + TypeScript** | App screens and interactions |
+| **Vinext + Vite** | Application routing and builds |
+| **CSS + Lucide icons** | Layout, soft colors, and familiar icons |
+| **Cloudflare Workers via Sites** | Server routes and hosting |
+| **Cloudflare D1 + R2** | Expense records and receipt storage |
+| **IndexedDB + Service Worker** | Offline records and cached app files |
+| **Sites / ChatGPT** | Sign-in |
+| **Frankfurter** | Daily currency reference rates |
+| **GitHub Pages** | Public sample preview |
+
+---
+
+## 🗂️ A Peek Inside
+
+```text
+travel-ledger/
+├── app/                 # Screens, styles, sign-in helpers & API routes
+├── db/                  # Database schema
+├── drizzle/             # Database migrations
+├── docs/                # Public preview with sample data
+├── public/              # App icons, manifest & offline worker
+├── tests/               # Permissions, sync rules & data checks
+├── DEVELOPMENT.md       # Setup, storage & implementation notes
+└── README.md            # You are here 🌷
+```
+
+---
+
+## 🚀 Try It Out
+
+### 🌷 Just looking around?
+
+Visit the [public preview](https://kawingtam.github.io/travel-ledger/) and switch between **Home**, **Add**, and **More**. It uses sample values and has no connection to the live database.
+
+### 🧳 Ready to record a trip?
+
+[Open the working app](https://roam-travel-ledger.kawingtam.chatgpt.site/) and sign in. You’ll need Site access before creating or joining a trip.
+
+### 💻 Exploring the code?
+
+```bash
+git clone https://github.com/kawingtam/travel-ledger.git
+cd travel-ledger
+```
+
+For the static preview:
+
+```bash
+python3 -m http.server 8000 --directory docs
+```
+
+Then open **http://localhost:8000**.
+
+For the full application, database setup, and checks, see the [development guide](DEVELOPMENT.md). GitHub Pages hosts the preview; the working app’s server routes and authentication run separately on Sites.
+
+---
+
+## 🌱 Current Status
+
+Roam is a personal project growing around a simple idea: **travel expense tracking should feel easy on a phone.**
+
+Shared trip records, custom categories, receipt capture, offline saving, currency summaries, and creator-only editing are implemented. Real iPhone and Android offline travel testing is still needed before relying on it for a trip.
+
+More implementation details and current limitations live in the [development guide](DEVELOPMENT.md).
+
+---
+
+<div align="center">
+
+## 🌿 Roam
+
+**Pack light. Spend thoughtfully. Keep exploring.**
+
+Made with soft greens, small steps & a little bit of ✨
+
+</div>
