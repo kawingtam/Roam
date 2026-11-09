@@ -40,7 +40,7 @@ $$;
 revoke all on function roam_private.member_of(text),roam_private.receipt_allowed(text,boolean) from public,anon;
 grant execute on function roam_private.member_of(text),roam_private.receipt_allowed(text,boolean) to authenticated;
 
-create function public.roam_data(payload jsonb default null) returns jsonb language plpgsql security definer set search_path='' as $$
+create function roam_private.roam_data(payload jsonb default null) returns jsonb language plpgsql security definer set search_path='' as $$
 declare
  uid uuid:=auth.uid(); action text:=payload->>'action'; tid text:=payload->>'trip'; eid text:=payload->>'id';
  username text; existing public.roam_expenses%rowtype; category_old public.roam_categories%rowtype;
@@ -137,10 +137,26 @@ begin
  raise exception 'Unknown action';
 end;
 $$;
+revoke all on function roam_private.roam_data(jsonb) from public,anon;
+grant execute on function roam_private.roam_data(jsonb) to authenticated;
+create function public.roam_data(payload jsonb default null) returns jsonb language sql security invoker set search_path='' as $$
+ select roam_private.roam_data(payload);
+$$;
 revoke all on function public.roam_data(jsonb) from public,anon;
 grant execute on function public.roam_data(jsonb) to authenticated;
 insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) values('roam-receipts','roam-receipts',false,8388608,array['image/jpeg','image/png']);
 create policy roam_receipt_read on storage.objects for select to authenticated using(bucket_id='roam-receipts' and roam_private.receipt_allowed(name,false));
 create policy roam_receipt_insert on storage.objects for insert to authenticated with check(bucket_id='roam-receipts' and roam_private.receipt_allowed(name,true));
 create policy roam_receipt_update on storage.objects for update to authenticated using(bucket_id='roam-receipts' and roam_private.receipt_allowed(name,true)) with check(bucket_id='roam-receipts' and roam_private.receipt_allowed(name,true));
+
+-- Direct table access is deliberately denied; validated RPCs are the only data API.
+create policy roam_rpc_only on public.roam_trips for all to anon,authenticated using(false) with check(false);
+create policy roam_rpc_only on public.roam_members for all to anon,authenticated using(false) with check(false);
+create policy roam_rpc_only on public.roam_categories for all to anon,authenticated using(false) with check(false);
+create policy roam_rpc_only on public.roam_expenses for all to anon,authenticated using(false) with check(false);
+create policy roam_rpc_only on public.roam_invites for all to anon,authenticated using(false) with check(false);
+create index roam_trips_owner on public.roam_trips(owner);
+create index roam_categories_creator on public.roam_categories(creator);
+create index roam_expenses_user on public.roam_expenses("user");
+create index roam_invites_trip on public.roam_invites(trip);
 commit;

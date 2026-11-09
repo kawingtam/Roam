@@ -8,11 +8,11 @@ A calm, mobile-first way to keep track of travel spending — from your first co
 
 **Less time keeping receipts. More time making memories.**
 
-[🌷 Explore the Preview](https://kawingtam.github.io/travel-ledger/) · [🔐 Open the App](https://roam-travel-ledger.kawingtam.chatgpt.site/)
+[🌷 Explore the Preview](https://kawingtam.github.io/travel-ledger/preview/) · [🔐 Open the App](https://kawingtam.github.io/travel-ledger/)
 
 </div>
 
-> 🛠️ A full GitHub Pages app with separate Supabase accounts and storage is being prepared on the `github-pages-app` branch. The current public link remains the sample preview until the private backend and existing data transfer are verified. See [migration setup](supabase/SETUP.md).
+> 🌿 The full app lives on GitHub Pages. Accounts, expenses, and private receipts stay in Supabase. See [backend and migration notes](supabase/SETUP.md).
 
 ---
 
@@ -24,7 +24,7 @@ Roam brings receipts, categories, currencies, and shared trips into one simple p
 
 > soft greens · clear totals · tiny steps · room to breathe 🌿
 
-The public preview uses **invented sample data**. The working app requires sign-in and currently has restricted Site access.
+The public preview uses **invented sample data**. The working app requires your own email/password account.
 
 ---
 
@@ -99,13 +99,13 @@ The code is public. Your travel records are kept separately.
 | Where | What Lives There |
 | --- | --- |
 | 💻 **GitHub** | App source, database structure, and the sample preview |
-| ☁️ **Cloudflare D1** | Trips, members, categories, and expenses |
-| 🧾 **Cloudflare R2** | Receipt photos |
+| ☁️ **Supabase Database** | Trips, members, categories, and expenses |
+| 🧾 **Supabase Storage** | Receipt photos |
 | 📱 **Your device** | Offline records and photos waiting to sync |
 
-The working app uses **Sites / ChatGPT sign-in**. Trip members can view shared trip expenses and receipts; only the person who added an expense can edit or delete it. Category names and icons are shared with the whole trip.
+The working app uses **Supabase email/password sign-in**. Trip members can view shared trip expenses and receipts; only the person who added an expense can edit or delete it. Category names and icons are shared with the whole trip.
 
-**A small access note:** the working Site is currently owner-private. A traveler needs Site access as well as a trip invitation. A GitHub account or a visit to the preview does not grant access to anyone’s trips.
+**A small access note:** every traveler needs their own account. A trip invitation grants access to that trip; a GitHub account or a visit to the public preview does not grant access to anyone’s records.
 
 ---
 
@@ -128,12 +128,11 @@ Currency conversions use daily reference rates. Your original amounts and curren
 | **React + TypeScript** | App screens and interactions |
 | **Vinext + Vite** | Application routing and builds |
 | **CSS + Lucide icons** | Layout, soft colors, and familiar icons |
-| **Cloudflare Workers via Sites** | Server routes and hosting |
-| **Cloudflare D1 + R2** | Expense records and receipt storage |
+| **GitHub Pages** | Full app interface and public preview |
+| **Supabase Postgres + Storage** | Private expense records and receipts |
 | **IndexedDB + Service Worker** | Offline records and cached app files |
-| **Sites / ChatGPT** | Sign-in |
+| **Supabase Auth** | Email/password sign-in and account sessions |
 | **Frankfurter** | Daily currency reference rates |
-| **GitHub Pages** | Public sample preview |
 
 ---
 
@@ -145,7 +144,7 @@ travel-ledger/
 ├── db/                  # Database schema
 ├── drizzle/             # Database migrations
 ├── docs/                # Public preview with sample data
-├── web/                 # Full GitHub Pages app (migration in progress)
+├── web/                 # Full GitHub Pages app
 ├── supabase/            # Private backend schema & migration guide
 ├── public/              # App icons, manifest & offline worker
 ├── tests/               # Permissions, sync rules & data checks
@@ -159,11 +158,11 @@ travel-ledger/
 
 ### 🌷 Just looking around?
 
-Visit the [public preview](https://kawingtam.github.io/travel-ledger/) and switch between **Home**, **Add**, and **More**. It uses sample values and has no connection to the live database.
+Visit the [public preview](https://kawingtam.github.io/travel-ledger/preview/) and switch between **Home**, **Add**, and **More**. It uses sample values and has no connection to the live database.
 
 ### 🧳 Ready to record a trip?
 
-[Open the working app](https://roam-travel-ledger.kawingtam.chatgpt.site/) and sign in. You’ll need Site access before creating or joining a trip.
+[Open the working app](https://kawingtam.github.io/travel-ledger/) and create an email/password account. Confirm your email, then sign in to create or join a trip.
 
 ### 💻 Exploring the code?
 
@@ -180,7 +179,7 @@ python3 -m http.server 8000 --directory docs
 
 Then open **http://localhost:8000**.
 
-For the full application, database setup, and checks, see the [development guide](DEVELOPMENT.md). GitHub Pages hosts the preview; the working app’s server routes and authentication run separately on Sites.
+For the full app locally, run `npm install` then `npm run dev:pages`. Database setup, permission rules, and deployment are covered in [supabase/SETUP.md](supabase/SETUP.md). The full interface is hosted on GitHub Pages; Supabase provides authentication, database operations, and receipt storage.
 
 ---
 

@@ -1,17 +1,17 @@
 # GitHub Pages + private Supabase backend
 
-Status: migration prepared; production cutover requires a connected Supabase project, hosted permission tests, and migration of existing records. The old app remains available until those checks pass.
+Status: the dedicated Roam Supabase project is configured and hosted login, membership, creator-only changes, and private receipt storage have passed tests. The full GitHub Pages deployment is being finalized. Existing records are retained on the previous host until the owner creates and verifies the destination account, then reconciled before the migration is called complete.
 
 ## Hosting
 
-- Full app: `https://kawingtam.github.io/travel-ledger/` after cutover.
+- Full app: `https://kawingtam.github.io/travel-ledger/`.
 - Source: this repository. Built HTML, JavaScript, CSS and icons only are deployed by GitHub Pages.
 - Accounts, trip/expense records and receipt photos: the selected Supabase project, never GitHub.
 - No ChatGPT login or `chatgpt.site` dependency in the new app's normal workflow.
 
 ## Backend setup
 
-1. Connect the Supabase integration and select or create a dedicated Roam project. Do not reuse SpaBooking's tables or change its authentication settings as a shortcut.
+1. The dedicated Roam project is `jmgpwtlvkrmxdjoqpzcl`, in Kathy Creations. For a fresh installation, connect Supabase and select or create a dedicated project. Do not reuse SpaBooking's tables or change its authentication settings as a shortcut.
 2. Apply `supabase/roam.sql` once as the project owner. It creates `roam_*` tables, private receipt storage and the `roam_data` RPC. It must complete as one transaction. There are no grants allowing anonymous data reads or direct client writes to tables.
 3. Enable email/password authentication. Add `https://kawingtam.github.io/travel-ledger/` to allowed redirect URLs; set the Site URL to the same address. Keep email confirmation enabled. Configure email delivery before inviting travelers; the default mail service has restrictions.
 4. Place only the project URL and browser-safe publishable/anon key in `web/public/config.js`. Never place a database password, access token, secret key or service_role key in this repository.
