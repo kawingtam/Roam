@@ -135,3 +135,28 @@ const rateResponse=await rateAPI.GET();assert.equal(rateResponse.status,200);ass
 globalThis.fetch=async()=>{throw new Error('offline');};assert.equal((await rateAPI.GET()).status,502);
 globalThis.fetch=originalFetch;
 console.log('PASS: exchange-rate API authentication, validation and network failure handling.');
+
+// Every trip member shares category names/icons; renames preserve expense ownership and values.
+globalThis.__user={userId:'alice',displayName:'Alice',email:'alice@example.test'};
+const beforeRename=db.prepare('SELECT amount,user FROM expenses WHERE id=?').get(expense.id);
+const foodEdit={action:'category',id:'category-food000',trip:trip.id,name:'Meals',previousName:'Food',icon:'coffee'};
+assert.equal((await post(foodEdit)).status,200);
+assert.equal(db.prepare('SELECT category FROM expenses WHERE id=?').get(expense.id).category,'Meals');
+assert.deepEqual(db.prepare('SELECT amount,user FROM expenses WHERE id=?').get(expense.id),beforeRename);
+globalThis.__user={userId:'bob',displayName:'Bob',email:'bob@example.test'};
+let sharedCategories=(await (await api.GET()).json()).categories;
+assert.equal(sharedCategories.find(c=>c.id===foodEdit.id).icon,'coffee');
+assert.equal((await post({...foodEdit,name:'Dining',icon:'food'})).status,200);
+assert.equal((await post({...expense,id:'expense-stale-cat',category:'Meals'})).status,200);
+assert.equal(db.prepare('SELECT category FROM expenses WHERE id=?').get('expense-stale-cat').category,'Dining');
+assert.equal((await post({...foodEdit,name:'Other'})).status,409);
+assert.equal((await post({...foodEdit,icon:'bad-icon'})).status,400);
+assert.equal((await post({...foodEdit,trip:otherTrip.id})).status,403);
+globalThis.__user={userId:'alice',displayName:'Alice',email:'alice@example.test'};
+assert.equal((await post({...custom,name:'Market',icon:'groceries'})).status,200);
+assert.equal(db.prepare('SELECT category FROM expenses WHERE id=?').get('expense-custom1').category,'Market');
+assert.equal((await post({...foodEdit,name:'Market'})).status,409);
+assert.equal((await post({...expense,id:'expense-bob1'})).status,403);
+globalThis.__user={userId:'charlie',displayName:'Charlie',email:'charlie@example.test'};
+assert.equal((await post({...foodEdit,name:'Hidden'})).status,403);
+console.log('PASS: shared category icons, default/custom renaming, stale offline aliases, conflict checks and creator ownership.');
