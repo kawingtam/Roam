@@ -48,3 +48,15 @@ body{background:#fcfcfa;color:#263b30}.app-header{height:62px;max-width:480px;bo
 .expense-flow{overscroll-behavior-y:auto}
 .flow-shell{min-height:100svh}
 @media(min-width:700px){.flow-shell{min-height:min(800px,100svh)}}
+
+/* A readable brand and a compact trip summary with full-size touch targets. */
+.app-header .brand{font-size:19px;letter-spacing:-.5px}.app-header .brand svg{width:19px;height:19px}
+.trip-info .trip-title{gap:10px}.trip-info .trip-title h1{flex:1;min-width:0;font-size:25px;overflow-wrap:anywhere}.trip-back{display:grid;place-items:center;width:44px;height:44px;margin-left:-10px;flex-shrink:0}
+.trip-info .detail-facts{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 16px;margin:12px 0}
+.trip-info .detail-facts>div{display:block;padding:10px 0;font-size:12px;min-width:0}.trip-info .detail-facts dt{font-size:11px;margin-bottom:3px;min-width:0}.trip-info .detail-facts dd{line-height:1.5}
+.trip-info .trip-totals-heading{font-size:14px;margin:16px 0 10px}.trip-info .home-total-card{min-height:72px;padding:11px 10px}.trip-info .home-total-card>strong{font-size:17px;margin-top:8px}
+.trip-info .exchange-details{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:0;margin:8px 0 12px;border:0}.trip-info .exchange-details p{font-size:10px;margin:0;line-height:1.5}.trip-info .exchange-details a{text-decoration:underline;text-underline-offset:2px}.trip-info .exchange-details .text-button{min-width:44px;min-height:44px;justify-content:center;flex-shrink:0}
+.trip-main-actions{display:flex;gap:10px}.trip-main-actions>.button{flex:1;min-height:46px;font-size:13px}.trip-invite{border-radius:28px;background:#edf4e8;border:1px solid #b4c8a6;color:#476e3c}.trip-info .trip-management{margin-top:10px;gap:6px}.trip-info .delete-expense{min-height:44px}.trip-info .form-note{margin:0}
+.mobile-main:has(.trip-info){padding-bottom:86px}
+
+@media(max-height:620px){.trip-info .detail-facts>div{padding:6px 0}.trip-info .trip-totals-heading{margin-top:10px}.trip-info .exchange-details{margin:4px 0}.mobile-main:has(.trip-info){padding-bottom:70px}}
