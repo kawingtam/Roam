@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import ExpenseFlow, {type ExpenseDraft} from './expense-flow';
 import {currencyDigits,parseAmount} from './money';
 import {tripStats,categorySpending} from './trip-stats';
@@ -125,7 +125,8 @@ export default function Ledger({initialUser,services=siteServices}:{initialUser:
  async function deleteExpense(e:Expense){if(!canEdit(e)||!user)return;if(busy.current||locked.current){setError('Sync is running. Try again in a moment.');return;}if(!window.confirm('Delete this expense?'))return;locked.current=true;try{await persist({...current.current,expenses:current.current.expenses.map(x=>x.id===e.id?{...x,deleted:1,pending:true}:x)});navigate('expenses');setNotice('Expense deleted.');}catch(error){setError((error as Error).message);}finally{locked.current=false;void sync();}}
  function openCategoryEditor(name?:string){if(!trip)return;const row=name?configuredCategories.find(c=>c.name===name):undefined;const editor=name?(row||{id:crypto.randomUUID(),trip:trip.id,name,aliases:[name],previousName:name,icon:defaultCategoryIcon(name)}):null;setCategoryEditor(editor);setPickedIcon(editor?.icon||'other');open('category');}
  async function addCategory(event:React.FormEvent<HTMLFormElement>){event.preventDefault();if(!trip||!user)return;if(busy.current||locked.current){setError('Sync is running. Try again in a moment.');return;}const name=String(new FormData(event.currentTarget).get('name')||'').trim();if(!name||name.length>32){setError('Use a category name of 1–32 characters.');return;}if(tripCategories.some(c=>c.toLowerCase()===name.toLowerCase()&&c.toLowerCase()!==categoryEditor?.name.toLowerCase())){setError('That category already exists.');return;}locked.current=true;try{const aliases=Array.from(new Set([...(categoryEditor?.aliases||[]),...(categoryEditor?[categoryEditor.name]:[])]));const updated:Category={id:categoryEditor?.id||crypto.randomUUID(),trip:trip.id,name,icon:pickedIcon,aliases,previousName:categoryEditor?.previousName,pending:true};await persist({...current.current,categories:[...current.current.categories.filter(c=>c.id!==updated.id),updated],expenses:current.current.expenses.map(e=>e.trip===trip.id&&[categoryEditor?.name,...aliases].some(n=>n?.toLowerCase()===e.category.toLowerCase())?{...e,category:name}:e)});setModal('');setNotice(categoryEditor?'Category updated for this trip.':'Category added to this trip.');}catch(e){setError((e as Error).message);}finally{locked.current=false;void sync();}}
- function navigate(next:string){setView(next);window.scrollTo({top:0,left:0,behavior:'instant'});}
+ useLayoutEffect(()=>{window.scrollTo({top:0,left:0,behavior:'instant'});},[view]);
+ function navigate(next:string){if(next===view)window.scrollTo({top:0,left:0,behavior:'instant'});setView(next);}
  function home(){navigate('home');setAdding(false);setNotice('');}
  return <><header className="app-header"><span className="brand"><Plane size={18}/>roam</span></header>
  <main className="mobile-main">{!user?<section className="welcome"><h1>Travel expenses</h1><a className="button primary" href={'/signin-with-chatgpt?return_to='+encodeURIComponent(typeof window!=='undefined'?location.pathname+location.search:'/')} target="_top">Sign in</a></section>:<>

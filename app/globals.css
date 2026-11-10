@@ -39,3 +39,12 @@ body{background:#fcfcfa;color:#263b30}.app-header{height:62px;max-width:480px;bo
 @media(max-height:620px){.overview-page:has(.home-total-cards){min-height:calc(100svh - 118px);grid-template-rows:auto auto auto minmax(100px,1fr) auto auto}.overview-page .overview-chart{width:110px;margin:8px auto}}
 
 .trip-title{display:flex;align-items:center;justify-content:space-between;gap:16px}.trip-title .text-button{flex-shrink:0;min-height:44px}.trip-management{display:grid;gap:14px;margin-top:16px}.trip-management>.text-button{justify-self:start}.invite-trip{border:1px solid #dfe8d7;background:#f1f6ed;border-radius:14px;padding:17px;margin:0 0 20px;display:grid;gap:8px}.invite-trip>span{font-size:11px;color:#6d805f}.invite-trip>strong{font-size:21px;font-weight:600;overflow-wrap:anywhere}.invite-trip>small{font-size:12px;color:#6b7e5d}.dialog .form-note{line-height:1.7}.dialog .flow-error{margin-top:16px}.dialog>.delete-expense{margin-top:4px}
+
+/* Fit the complete total inside the ring at every chart size. */
+.chart-total{display:block;width:95%;height:auto;flex-shrink:0;overflow:visible;fill:currentColor;font-weight:600;letter-spacing:-1px}
+.flow-step .reference-field input[type=date]{text-align:left;min-height:44px;appearance:none;-webkit-appearance:none}
+.flow-step .reference-field input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+.flow-step .reference-field input[type=date]::-webkit-datetime-edit{padding:0;display:inline-flex}
+.expense-flow{overscroll-behavior-y:auto}
+.flow-shell{min-height:100svh}
+@media(min-width:700px){.flow-shell{min-height:min(800px,100svh)}}
