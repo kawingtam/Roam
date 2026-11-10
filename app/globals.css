@@ -31,9 +31,9 @@ body{background:#fcfcfa;color:#263b30}.app-header{height:62px;max-width:480px;bo
 
 .exchange-details{padding:14px 0;border-top:1px solid #e4eadd}.exchange-details p{margin-bottom:4px}.exchange-details .text-button{font-size:12px}
 
-/* Three Home zones: trip and totals, centered chart, category ranking. */
-.overview-page:has(.home-total-cards){display:grid;grid-template-rows:auto auto auto minmax(120px,1fr) auto auto;min-height:calc(100dvh - 146px)}
-.overview-page .overview-chart{width:min(210px,24dvh);margin:18px auto;align-self:center}
+/* Keep Home stable while mobile browser bars expand and collapse. */
+.overview-page:has(.home-total-cards){display:grid;grid-template-rows:auto auto auto minmax(120px,1fr) auto auto;min-height:calc(100svh - 146px)}
+.overview-page .overview-chart{width:min(210px,24svh);margin:18px auto;align-self:center}
 .overview-page .category-heading{margin-top:8px}
-@media(max-height:720px){.overview-page:has(.home-total-cards){min-height:calc(100dvh - 131px);grid-template-rows:auto auto auto minmax(110px,1fr) auto auto}.overview-page .overview-chart{width:min(155px,22dvh);margin:10px auto}.overview-page .category-heading{margin-top:4px}}
-@media(max-height:620px){.overview-page:has(.home-total-cards){min-height:calc(100dvh - 118px);grid-template-rows:auto auto auto minmax(100px,1fr) auto auto}.overview-page .overview-chart{width:110px;margin:8px auto}}
+@media(max-height:720px){.overview-page:has(.home-total-cards){min-height:calc(100svh - 131px);grid-template-rows:auto auto auto minmax(110px,1fr) auto auto}.overview-page .overview-chart{width:min(155px,22svh);margin:10px auto}.overview-page .category-heading{margin-top:4px}}
+@media(max-height:620px){.overview-page:has(.home-total-cards){min-height:calc(100svh - 118px);grid-template-rows:auto auto auto minmax(100px,1fr) auto auto}.overview-page .overview-chart{width:110px;margin:8px auto}}
