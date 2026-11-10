@@ -105,7 +105,7 @@ The code is public. Your travel records are kept separately.
 
 The working app uses **Supabase email/password sign-in**. Trip members can view shared trip expenses and receipts; only the person who added an expense can edit or delete it. Category names and icons are shared with the whole trip.
 
-**A small access note:** every traveler needs their own account. A trip invitation grants access to that trip; a GitHub account or a visit to the public preview does not grant access to anyone’s records.
+**A small access note:** every traveler needs their own account. A trip invitation grants access to that trip; a GitHub account or a visit to the public preview does not grant access to anyone’s records. The current setup is for personal use; email delivery for travelers outside the Supabase project team will be configured separately.
 
 ---
 
@@ -126,7 +126,7 @@ Currency conversions use daily reference rates. Your original amounts and curren
 | Technology | Its Little Job |
 | --- | --- |
 | **React + TypeScript** | App screens and interactions |
-| **Vinext + Vite** | Application routing and builds |
+| **Vite** | Static app builds for GitHub Pages |
 | **CSS + Lucide icons** | Layout, soft colors, and familiar icons |
 | **GitHub Pages** | Full app interface and public preview |
 | **Supabase Postgres + Storage** | Private expense records and receipts |

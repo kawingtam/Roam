@@ -1,6 +1,6 @@
 # GitHub Pages + private Supabase backend
 
-Status: the dedicated Roam Supabase project is configured and hosted login, membership, creator-only changes, and private receipt storage have passed tests. The full GitHub Pages deployment is being finalized. Existing records are retained on the previous host until the owner creates and verifies the destination account, then reconciled before the migration is called complete.
+Status: the full app is live on GitHub Pages. The dedicated Supabase backend is configured and hosted login, shared reads, creator-only changes, private receipt storage, and anonymous/outsider denial have passed tests. The original owner's records and receipt were transferred to the verified destination account and reconciled privately; the app reports everything synced. The old owner-private site is retained as a backup. No personal records or photos are included in this repository.
 
 ## Hosting
 
@@ -21,9 +21,11 @@ Status: the dedicated Roam Supabase project is configured and hosted login, memb
 
 ChatGPT account IDs and Supabase user IDs are different. Do not import records with a guessed ownership mapping, expose the old private API to anonymous visitors, or copy production records/photos into GitHub.
 
-The current app stays available at `https://roam-travel-ledger.kawingtam.chatgpt.site/` until migration is verified. Export and transfer existing records privately after the new account is confirmed. Reconcile trip and expense counts, original currency totals and receipt availability. Shared trips require verified account mappings for their members. Keep unsynced browser entries on the old origin until they are uploaded; a new hostname cannot read that origin's IndexedDB.
+The previous app remains owner-private at `https://roam-travel-ledger.kawingtam.chatgpt.site/` until migration is verified. Export and transfer existing records privately after the new account is confirmed. Reconcile trip and expense counts, original currency totals and receipt availability. Shared trips require verified account mappings for their members. Keep unsynced browser entries on the old origin until they are uploaded; a new hostname cannot read that origin's IndexedDB.
 
 ## Build and publication
+
+Pushes to `main` publish the full app automatically through GitHub Actions. The manual **Publish Roam app** action is also available. Both paths validate the browser configuration and run database permission/build/cache checks before deploying.
 
 ```sh
 npm ci
@@ -36,7 +38,7 @@ node tests/pages.mjs
 
 For local preview, `npm run dev:pages` serves `/travel-ledger/`. Without backend configuration, the page clearly says setup is pending and links to existing trips. It cannot save fake or anonymous expenses.
 
-After backend setup, data reconciliation and phone testing pass:
+For a fresh installation, after backend setup, data reconciliation and phone testing pass:
 
 1. Merge the migration branch to `main`.
 2. Set repository Settings → Pages → Source to GitHub Actions.
@@ -51,3 +53,13 @@ The browser uses Supabase's official client for sessions and token refresh. The 
 The GitHub app uses its own IndexedDB database and cache names. The Service Worker caches the public shell only, within `/travel-ledger/`; it does not cache Supabase data, login requests, receipt URLs, or other apps hosted under `kawingtam.github.io`. Pending entries and receipt blobs remain per-account locally until upload succeeds. Account sign-out is blocked while entries remain pending.
 
 Database tests run the actual SQL in embedded PostgreSQL with three invented users, restricted roles and a storage-policy test schema. They cover anonymous denial, shared trip reads, outsider isolation, direct-write rejection, creator-only changes, category rename aliases, retry safety, validation and private receipt access.
+
+## Current personal-use settings
+
+Email/password sign-in and email confirmation are enabled; anonymous sign-in is disabled. The server minimum password length is 8 characters. GitHub Pages is configured as the Site URL and permitted authentication redirect destination.
+
+The owner chose personal use first. Supabase's built-in email sender is restricted to project-team addresses. Configure a custom SMTP provider before inviting travelers outside the team: [Supabase email delivery](https://supabase.com/docs/guides/auth/auth-smtp). Email confirmation has not been disabled to work around delivery restrictions.
+
+The Free plan does not include [leaked-password screening](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection); no paid plan was enabled. Disposable test accounts and their isolated test trip were left in place at the owner's request. Their uploaded test image was removed during validation. They are not members of the owner's migrated trip.
+
+Local checks do not replace testing offline capture and reconnect on actual iPhone and Android devices before a trip.

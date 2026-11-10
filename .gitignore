@@ -53,3 +53,7 @@ yarn-error.log*
 
 # GitHub Pages build output
 /pages-dist/
+
+# Supabase local credentials and branch state
+/supabase/.temp/
+/supabase/.branches/
