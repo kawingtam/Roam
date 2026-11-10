@@ -7,7 +7,7 @@ grant usage on schema roam_private to authenticated;
 create table public.roam_trips (
  id text primary key check(id ~ '^[A-Za-z0-9_-]{8,80}$'),owner uuid not null references auth.users(id),
  name text not null check(length(name) between 1 and 100),destination text not null default '',currency text not null check(currency ~ '^[A-Z]{3}$'),
- start text not null,"end" text not null,created bigint not null
+ start text not null,"end" text not null,created bigint not null,deleted integer not null default 0 check(deleted in(0,1))
 );
 create table public.roam_members(trip text not null references public.roam_trips(id),"user" uuid not null references auth.users(id),primary key(trip,"user"));
 create index roam_members_user on public.roam_members("user",trip);
@@ -32,7 +32,7 @@ alter table public.roam_invites enable row level security;
 revoke all on public.roam_trips,public.roam_members,public.roam_categories,public.roam_expenses,public.roam_invites from anon,authenticated;
 
 create function roam_private.member_of(t text) returns boolean language sql stable security definer set search_path='' as $$
- select auth.uid() is not null and exists(select 1 from public.roam_members where trip=t and "user"=auth.uid());
+ select auth.uid() is not null and exists(select 1 from public.roam_members m join public.roam_trips r on r.id=m.trip where m.trip=t and m."user"=auth.uid() and r.deleted=0);
 $$;
 create function roam_private.receipt_allowed(path text,writing boolean) returns boolean language sql stable security definer set search_path='' as $$
  select auth.uid() is not null and exists(select 1 from public.roam_expenses e where path=e."user"::text||'/'||e.id and e.deleted=0 and roam_private.member_of(e.trip) and (not writing or e."user"=auth.uid()));
@@ -45,7 +45,7 @@ declare
  uid uuid:=auth.uid(); action text:=payload->>'action'; tid text:=payload->>'trip'; eid text:=payload->>'id';
  username text; existing public.roam_expenses%rowtype; category_old public.roam_categories%rowtype;
  category_row public.roam_categories%rowtype; aliases jsonb:='[]'; previous text:=''; category_name text; icon_name text;
- token text; join_trip text; saved_id text; prior_owner uuid;
+ token text; saved_id text; trip_row public.roam_trips%rowtype; invite_expires timestamptz;
  ms bigint:=floor(extract(epoch from clock_timestamp())*1000)::bigint;
  defaults text[]:=array['Food','Transport','Stay','Shopping','Activities','Other'];
  icons text[]:=array['food','transport','stay','shopping','activities','other','coffee','plane','car','fuel','health','groceries','gift','work','phone','drink'];
@@ -59,21 +59,35 @@ begin
    'categories',coalesce((select jsonb_agg(to_jsonb(c)) from public.roam_categories c where roam_private.member_of(c.trip)),'[]'::jsonb));
  end if;
  if jsonb_typeof(payload)<>'object' then raise exception 'Invalid request';end if;
- if action='trip' then
+ if action in('trip','edit_trip') then
   if eid is null or eid!~'^[A-Za-z0-9_-]{8,80}$' or coalesce(length(btrim(payload->>'name')),0) not between 1 and 100 or coalesce(length(payload->>'destination'),1000)>150 or coalesce(payload->>'currency','')!~'^[A-Z]{3}$' or coalesce(payload->>'start','')!~'^\d{4}-\d{2}-\d{2}$' or coalesce(payload->>'end','')!~'^\d{4}-\d{2}-\d{2}$' or (payload->>'end')::date<(payload->>'start')::date then raise exception 'Check the trip name, currency and dates';end if;
-  select owner into prior_owner from public.roam_trips where id=eid;
-  if found then if prior_owner<>uid then raise exception 'Trip ID already in use' using errcode='42501';end if;return '{"ok":true}';end if;
-  insert into public.roam_trips values(eid,uid,btrim(payload->>'name'),payload->>'destination',payload->>'currency',payload->>'start',payload->>'end',ms);
+  select * into trip_row from public.roam_trips where id=eid for update;
+  if found then
+   if trip_row.owner<>uid then raise exception 'Only the trip creator can edit this trip' using errcode='42501';end if;
+   if trip_row.deleted<>0 then raise exception 'This trip was deleted. Your unsynced entries remain on this device';end if;
+   if action='edit_trip' then update public.roam_trips set name=btrim(payload->>'name'),destination=payload->>'destination',currency=payload->>'currency',start=payload->>'start',"end"=payload->>'end' where id=eid;end if;
+   return '{"ok":true}';
+  end if;
+  if action='edit_trip' then raise exception 'Trip not found';end if;
+  insert into public.roam_trips(id,owner,name,destination,currency,start,"end",created) values(eid,uid,btrim(payload->>'name'),payload->>'destination',payload->>'currency',payload->>'start',payload->>'end',ms);
   insert into public.roam_members values(eid,uid);return '{"ok":true}';
- elsif action='join' then
+ elsif action='delete_trip' then
+  select * into trip_row from public.roam_trips where id=tid for update;
+  if not found or trip_row.owner<>uid then raise exception 'Only the trip creator can delete this trip' using errcode='42501';end if;
+  -- Retain records for sync safety; deleting the trip immediately revokes shared access.
+  update public.roam_trips set deleted=1 where id=tid;return '{"ok":true}';
+ elsif action in('join','preview_invite') then
   token:=payload->>'token';if coalesce(length(token),0) not between 32 and 100 then raise exception 'Invalid invitation';end if;
-  select trip into join_trip from public.roam_invites where id=encode(sha256(convert_to(token,'UTF8')),'hex') and expires>now();
+  select t.* into trip_row from public.roam_invites i join public.roam_trips t on t.id=i.trip where i.id=encode(sha256(convert_to(token,'UTF8')),'hex') and i.expires>now() and t.deleted=0 for update of t;
   if not found then raise exception 'Invitation expired or invalid. Ask for a new link';end if;
-  insert into public.roam_members values(join_trip,uid) on conflict do nothing;return jsonb_build_object('ok',true,'trip',join_trip);
+  if action='preview_invite' then return jsonb_build_object('id',trip_row.id,'name',trip_row.name,'destination',trip_row.destination,'start',trip_row.start,'end',trip_row."end");end if;
+  insert into public.roam_members values(trip_row.id,uid) on conflict do nothing;return jsonb_build_object('ok',true,'trip',trip_row.id);
  elsif action='invite' then
-  if not exists(select 1 from public.roam_trips where id=tid and owner=uid) then raise exception 'Only the trip creator can invite travelers' using errcode='42501';end if;
-  token:=gen_random_uuid()::text||gen_random_uuid()::text;
-  insert into public.roam_invites values(encode(sha256(convert_to(token,'UTF8')),'hex'),tid,now()+interval '7 days');return jsonb_build_object('token',token);
+  select * into trip_row from public.roam_trips where id=tid and owner=uid and deleted=0 for update;
+  if not found then raise exception 'Only the trip creator can invite travelers to an active trip' using errcode='42501';end if;
+  token:=gen_random_uuid()::text||gen_random_uuid()::text;invite_expires:=now()+interval '7 days';
+  insert into public.roam_invites values(encode(sha256(convert_to(token,'UTF8')),'hex'),tid,invite_expires);
+  return jsonb_build_object('token',token,'trip',tid,'name',trip_row.name,'expires',invite_expires);
  end if;
  if eid is null or eid!~'^[A-Za-z0-9_-]{8,80}$' then raise exception 'Invalid entry ID';end if;
  if action in('delete','restore','receipt','receipt_path') then
@@ -91,10 +105,12 @@ begin
   else update public.roam_expenses set deleted=case when action='delete' then 1 else 0 end,updated=ms where id=eid;end if;
   return '{"ok":true}';
  end if;
+ if exists(select 1 from public.roam_trips t join public.roam_members m on m.trip=t.id where t.id=tid and m."user"=uid and t.deleted=1) then raise exception 'This trip was deleted. Your unsynced entries remain on this device';end if;
  if not roam_private.member_of(tid) then raise exception 'You do not belong to this trip' using errcode='42501';end if;
  -- ponytail: serialize writes within one trip so renames and offline expense sync agree;
  -- replace with category-level locks if a single trip needs high write throughput.
- perform id from public.roam_trips where id=tid for update;
+ perform id from public.roam_trips where id=tid and deleted=0 for update;
+ if not found then raise exception 'This trip was deleted. Your unsynced entries remain on this device';end if;
  if action='category' then
   category_name:=btrim(payload->>'name');icon_name:=coalesce(payload->>'icon','other');
   if coalesce(length(category_name),0) not between 1 and 32 or category_name~'[[:cntrl:]]' or not(icon_name=any(icons)) then raise exception 'Choose a name of 1–32 characters and a valid icon';end if;

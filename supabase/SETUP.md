@@ -63,3 +63,9 @@ The owner chose personal use first. Supabase's built-in email sender is restrict
 The Free plan does not include [leaked-password screening](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection); no paid plan was enabled. Disposable test accounts and their isolated test trip were left in place at the owner's request. Their uploaded test image was removed during validation. They are not members of the owner's migrated trip.
 
 Local checks do not replace testing offline capture and reconnect on actual iPhone and Android devices before a trip.
+
+### Trip management and invitations
+
+Only the trip creator can edit trip details or remove a trip. Removal keeps a server tombstone, hides the trip for all members, and revokes receipt and invitation access; there is no restore screen. Existing expense amounts and currencies are unchanged by edits to trip details. Trip editing and removal require a connection.
+
+Invitations belong to exactly one active trip and expire after seven days. A signed-in recipient previews the name, destination, and dates before joining. Previewing does not add membership or expose expenses. Anyone with the link and an account can accept, so share links only with intended travelers.
