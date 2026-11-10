@@ -1,6 +1,6 @@
 # Roam hosting and data
 
-- The active app is https://kawingtam.github.io/travel-ledger/ and the public sample preview is at /travel-ledger/preview/.
+- The active app is https://kawingtam.github.io/Roam/ and the public sample preview is at /Roam/preview/.
 - `web/` is the static frontend; `app/ledger.tsx` and its shared components provide the mobile screens. Build with `npm run build:pages`.
 - GitHub Actions publishes `pages-dist/` on pushes to `main`. Only static assets belong in the deployment.
 - Supabase handles accounts, database operations, and private receipts. `web/public/config.js` contains browser-safe configuration only.

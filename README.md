@@ -8,7 +8,7 @@ A calm, mobile-first way to keep track of travel spending — from your first co
 
 **Less time keeping receipts. More time making memories.**
 
-[🌷 Explore the Preview](https://kawingtam.github.io/travel-ledger/preview/) · [🔐 Open the App](https://kawingtam.github.io/travel-ledger/)
+[🌷 Explore the Preview](https://kawingtam.github.io/Roam/preview/) · [🔐 Open the App](https://kawingtam.github.io/Roam/)
 
 </div>
 
@@ -139,7 +139,7 @@ Currency conversions use daily reference rates. Your original amounts and curren
 ## 🗂️ A Peek Inside
 
 ```text
-travel-ledger/
+Roam/
 ├── app/                 # Screens, styles, sign-in helpers & API routes
 ├── db/                  # Database schema
 ├── drizzle/             # Database migrations
@@ -158,17 +158,17 @@ travel-ledger/
 
 ### 🌷 Just looking around?
 
-Visit the [public preview](https://kawingtam.github.io/travel-ledger/preview/) and switch between **Home**, **Add**, and **More**. It uses sample values and has no connection to the live database.
+Visit the [public preview](https://kawingtam.github.io/Roam/preview/) and switch between **Home**, **Add**, and **More**. It uses sample values and has no connection to the live database.
 
 ### 🧳 Ready to record a trip?
 
-[Open the working app](https://kawingtam.github.io/travel-ledger/) and create an email/password account. Confirm your email, then sign in to create or join a trip.
+[Open the working app](https://kawingtam.github.io/Roam/) and create an email/password account. Confirm your email, then sign in to create or join a trip.
 
 ### 💻 Exploring the code?
 
 ```bash
-git clone https://github.com/kawingtam/travel-ledger.git
-cd travel-ledger
+git clone https://github.com/kawingtam/Roam.git
+cd Roam
 ```
 
 For the static preview:

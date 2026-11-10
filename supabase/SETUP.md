@@ -4,7 +4,7 @@ Status: the full app is live on GitHub Pages. The dedicated Supabase backend is 
 
 ## Hosting
 
-- Full app: `https://kawingtam.github.io/travel-ledger/`.
+- Full app: `https://kawingtam.github.io/Roam/`.
 - Source: this repository. Built HTML, JavaScript, CSS and icons only are deployed by GitHub Pages.
 - Accounts, trip/expense records and receipt photos: the selected Supabase project, never GitHub.
 - No ChatGPT login or `chatgpt.site` dependency in the new app's normal workflow.
@@ -13,7 +13,7 @@ Status: the full app is live on GitHub Pages. The dedicated Supabase backend is 
 
 1. The dedicated Roam project is `jmgpwtlvkrmxdjoqpzcl`, in Kathy Creations. For a fresh installation, connect Supabase and select or create a dedicated project. Do not reuse SpaBooking's tables or change its authentication settings as a shortcut.
 2. Apply `supabase/roam.sql` once as the project owner. It creates `roam_*` tables, private receipt storage and the `roam_data` RPC. It must complete as one transaction. There are no grants allowing anonymous data reads or direct client writes to tables.
-3. Enable email/password authentication. Add `https://kawingtam.github.io/travel-ledger/` to allowed redirect URLs; set the Site URL to the same address. Keep email confirmation enabled. Configure email delivery before inviting travelers; the default mail service has restrictions.
+3. Enable email/password authentication. Add `https://kawingtam.github.io/Roam/` to allowed redirect URLs; set the Site URL to the same address. Keep email confirmation enabled. Configure email delivery before inviting travelers; the default mail service has restrictions.
 4. Place only the project URL and browser-safe publishable/anon key in `web/public/config.js`. Never place a database password, access token, secret key or service_role key in this repository.
 5. Create two disposable test accounts in a test environment and verify hosted auth, create/join trip, cross-account read, creator-only edit/delete, private receipt upload/read, signed URL expiry, and anonymous rejection. Local PostgreSQL tests do not prove the actual project's authentication and storage configuration.
 
@@ -36,7 +36,7 @@ npm run build:pages
 node tests/pages.mjs
 ```
 
-For local preview, `npm run dev:pages` serves `/travel-ledger/`. Without backend configuration, the page clearly says setup is pending and links to existing trips. It cannot save fake or anonymous expenses.
+For local preview, `npm run dev:pages` serves `/Roam/`. Without backend configuration, the page clearly says setup is pending and links to existing trips. It cannot save fake or anonymous expenses.
 
 For a fresh installation, after backend setup, data reconciliation and phone testing pass:
 
@@ -50,7 +50,7 @@ For a fresh installation, after backend setup, data reconciliation and phone tes
 
 The browser uses Supabase's official client for sessions and token refresh. The database derives the acting user from `auth.uid()`, not a user ID in the request. A restricted RPC applies validation, trip membership and creator ownership. Direct table access is revoked and RLS is enabled. Receipt policies separately enforce membership/ownership in a private bucket; signed links last five minutes and should be treated as temporary access links.
 
-The GitHub app uses its own IndexedDB database and cache names. The Service Worker caches the public shell only, within `/travel-ledger/`; it does not cache Supabase data, login requests, receipt URLs, or other apps hosted under `kawingtam.github.io`. Pending entries and receipt blobs remain per-account locally until upload succeeds. Account sign-out is blocked while entries remain pending.
+The GitHub app uses its own IndexedDB database and cache names. The Service Worker caches the public shell only, within `/Roam/`; it does not cache Supabase data, login requests, receipt URLs, or other apps hosted under `kawingtam.github.io`. Pending entries and receipt blobs remain per-account locally until upload succeeds. Account sign-out is blocked while entries remain pending.
 
 Database tests run the actual SQL in embedded PostgreSQL with three invented users, restricted roles and a storage-policy test schema. They cover anonymous denial, shared trip reads, outsider isolation, direct-write rejection, creator-only changes, category rename aliases, retry safety, validation and private receipt access.
 

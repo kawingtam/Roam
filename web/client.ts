@@ -1,6 +1,6 @@
 import {createClient} from '@supabase/supabase-js';
 import type {LedgerServices,User} from '../app/ledger';
-export const basePath='/travel-ledger/';
+export const basePath='/Roam/';
 declare global {interface Window {ROAM_CONFIG?:{supabaseUrl:string,publishableKey:string}}}
 const config=window.ROAM_CONFIG;
 export const configured=!!config&&/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(config.supabaseUrl)&&(/^(sb_publishable_)/.test(config.publishableKey)||/^eyJ/.test(config.publishableKey));

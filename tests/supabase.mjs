@@ -5,7 +5,7 @@ import ts from 'typescript';
 const tokenCode=ts.transpileModule(readFileSync('app/invite.ts','utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
 const {invitationToken}=await import('data:text/javascript;base64,'+Buffer.from(tokenCode).toString('base64'));
 const sampleToken='12345678-1234-1234-1234-12345678901212345678-1234-1234-1234-123456789012';
-assert.equal(invitationToken(' https://kawingtam.github.io/travel-ledger/?invite='+sampleToken+' '),sampleToken);assert.equal(invitationToken(sampleToken),sampleToken);
+assert.equal(invitationToken(' https://kawingtam.github.io/Roam/?invite='+sampleToken+' '),sampleToken);assert.equal(invitationToken(sampleToken),sampleToken);
 for(const input of ['', 'https://example.test/', 'javascript:alert(1)', 'not-a-link', 'a'.repeat(101)])assert.throws(()=>invitationToken(input),/valid invitation/);
 const db=new PGlite();
 await db.exec(`create role anon;create role authenticated;create schema auth;create schema storage;
