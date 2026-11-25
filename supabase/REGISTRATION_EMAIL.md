@@ -2,7 +2,7 @@
 
 The separate browser page supports owner-only registration decisions, display-name editing and guarded deletion of empty accounts. It uses the same Roam email and password as the app. Server authorization does not trust user-editable metadata.
 
-Apply `registration-review.sql` once after `roam.sql`, then `account-review.sql`. Existing deployments already have these account/approval functions. Deletion requires typing the target email and is blocked for administrators, approved accounts, and any trip, expense, category, membership or receipt data. Name edits and deletions are audited privately. Removing the registration row makes stale tokens fail every Roam data gate.
+Apply `registration-review.sql` once after `roam.sql`, then `account-review.sql`. Existing deployments already have these account/approval functions. Deletion requires typing the target email and is blocked for administrators and any trip, expense, category, membership or receipt data. Name edits and deletions are audited privately. Removing the registration row makes stale tokens fail every Roam data gate.
 
 `npm run build:pages` builds the review page at `/Roam/registration-review.html` and a self-contained copy at `/Roam/preview/registration-review.html`. Its public client uses only browser-safe configuration.
 

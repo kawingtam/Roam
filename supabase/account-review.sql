@@ -31,7 +31,6 @@ begin
    insert into roam_private.account_review_audit(actor,target,action,details) values(uid,target,'rename',jsonb_build_object('previous_name',account.name,'name',next_name));
   else
    if target=uid or exists(select 1 from public.roam_registration_admins where user_id=target) then raise exception 'Administrator accounts cannot be deleted'; end if;
-   if account.status='approved' then raise exception 'Deny access before deleting an approved account'; end if;
    if coalesce(lower(btrim(payload->>'confirm_email')),'')<>account.email then raise exception 'Type the exact account email to confirm deletion'; end if;
    if exists(select 1 from public.roam_trips where owner=target)
     or exists(select 1 from public.roam_expenses where "user"=target)

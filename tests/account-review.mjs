@@ -23,7 +23,7 @@ await as(1);let result=await manage({action:'list'});assert.equal(result.account
 await manage({action:'rename',user_id:id(3),name:'  Updated traveler  '});
 await assert.rejects(()=>manage({action:'rename',user_id:id(3),name:' '}),/1 to 100/);await assert.rejects(()=>manage({action:'rename',user_id:id(3),name:'x'.repeat(101)}),/1 to 100/);
 await assert.rejects(()=>manage({action:'delete',user_id:id(1),confirm_email:'kawingtam7@gmail.com'}),/Administrator accounts/);
-await assert.rejects(()=>manage({action:'delete',user_id:id(2),confirm_email:'other@example.test'}),/Deny access before/);
+result=await manage({action:'delete',user_id:id(2),confirm_email:'other@example.test'});assert(!result.accounts.some(a=>a.user_id===id(2)));
 await assert.rejects(()=>manage({action:'delete',user_id:id(3),confirm_email:'wrong@example.test'}),/exact account email/);
 await db.exec('reset role');let row=(await db.query('select r.name,r.status,u.raw_user_meta_data from public.roam_registration_requests r join auth.users u on u.id=r.user_id where user_id=$1',[id(3)])).rows[0];assert.equal(row.name,'Updated traveler');assert.equal(row.raw_user_meta_data.name,'Updated traveler');assert.equal(row.status,'pending');
 await db.query(`insert into public.roam_trips(id,owner,name,destination,currency,start,"end",created) values('fixture-trip',$1,'Fixture','Test','USD','2026-01-01','2026-01-02',1)`,[id(4)]);
@@ -33,8 +33,8 @@ await db.query(`insert into public.roam_members(trip,"user") values('fixture-tri
 await db.query(`insert into public.roam_categories(id,trip,name,icon,aliases,key,creator) values('fixture-category','fixture-trip','Fixture','other','[]','fixture-key',$1)`,[id(8)]);
 await as(1);for(let n=4;n<=8;n++)await assert.rejects(()=>manage({action:'delete',user_id:id(n),confirm_email:`test${n}@example.test`}),/has Roam data/);
 result=await manage({action:'delete',user_id:id(3),confirm_email:'test3@example.test'});assert(!result.accounts.some(a=>a.user_id===id(3)));
-await db.exec('reset role');assert.equal((await db.query('select count(*)::int n from auth.users where id=$1',[id(3)])).rows[0].n,0);assert.equal((await db.query('select count(*)::int n from roam_private.account_review_audit')).rows[0].n,2);assert.equal((await db.query('select count(*)::int n from public.roam_trips')).rows[0].n,1);assert.equal((await db.query('select count(*)::int n from public.roam_expenses')).rows[0].n,1);
+await db.exec('reset role');assert.equal((await db.query('select count(*)::int n from auth.users where id=$1',[id(3)])).rows[0].n,0);assert.equal((await db.query('select count(*)::int n from roam_private.account_review_audit')).rows[0].n,3);assert.equal((await db.query('select count(*)::int n from public.roam_trips')).rows[0].n,1);assert.equal((await db.query('select count(*)::int n from public.roam_expenses')).rows[0].n,1);
 await as(3);await assert.rejects(()=>db.query('select public.roam_data(null::jsonb)'),/approved|registration/i);
 await as(2);await assert.rejects(()=>db.query('select * from roam_private.account_review_audit'),/permission denied/);
-console.log('PASS: sole-owner authorization, atomic name changes, typed deletion confirmation, administrator protection, approved-account guard, every data-reference guard, audit trail, and stale-token data denial after fixture deletion. No live users changed.');
+console.log('PASS: sole-owner authorization, atomic name changes, typed deletion confirmation, administrator protection, approved empty-account deletion, every data-reference guard, audit trail, and stale-token data denial after fixture deletion. No live users changed.');
 await db.close();
