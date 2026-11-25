@@ -60,3 +60,36 @@ body{background:#fcfcfa;color:#263b30}.app-header{height:62px;max-width:480px;bo
 .mobile-main:has(.trip-info){padding-bottom:86px}
 
 @media(max-height:620px){.trip-info .detail-facts>div{padding:6px 0}.trip-info .trip-totals-heading{margin-top:10px}.trip-info .exchange-details{margin:4px 0}.mobile-main:has(.trip-info){padding-bottom:70px}}
+
+/* Transparent supplied wordmark; retain the original white and sage palette. */
+.app-header{height:72px;min-height:72px;display:flex;align-items:center;justify-content:center;background:transparent}
+.app-header .brand-logo{display:block;width:112px;height:60px;object-fit:contain}
+
+/* Match the public preview's white canvas, sage cards and simple category rows. */
+body{color:#293a2a;background:#fff}
+:root{--roam-green:#5b864e;--roam-border:#edf0e8}
+.overview-page .category-heading{margin-top:8px;min-height:30px}
+.overview-page .category-heading h2{font-size:12px;font-weight:400;color:#6b795f}
+.overview-page .overview-legend-row{padding:13px 0;min-height:46px;gap:9px;border-bottom:1px solid #edf0e8}
+.overview-page .legend-dot{width:9px;height:9px}
+.overview-page .legend-name{font-size:14px;color:#293a2a}
+.overview-page .legend-value>strong{font-size:13px;font-weight:500;color:#293a2a}
+.home-total-card{border-color:#e2e7dc;border-radius:13px;background:#fff}
+.home-total-card.selected{background:#eef4e9;border-color:#e2e7dc}
+.home-total-card>span{color:#74836a;font-size:11px}
+.home-total-card>strong{font-size:18px;letter-spacing:0}
+.bottom-nav{background:#fffffff5;border-color:#e8ece2}
+.bottom-nav button{color:#87927d}.bottom-nav .active{color:#517b45}
+.quick-category-grid button>span{background:#edf3e8}
+.app-header{height:64px;min-height:64px}
+.app-header .brand-logo{height:54px;width:104px}
+
+/* Compact overview: natural flow, modest chart spacing, scroll-safe navigation. */
+.app-header{height:56px;min-height:56px}
+.app-header .brand-logo{height:46px;width:96px}
+.overview-page:has(.home-total-cards){display:block;min-height:0}
+.mobile-main:has(.overview-page){padding-top:8px;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+.overview-page .overview-chart{width:min(160px,42vw);margin:20px auto 16px;align-self:auto}
+.overview-page .category-heading{margin-top:0;min-height:30px}
+.overview-page .overview-legend-row{padding:11px 0;min-height:44px}
+@media(max-height:720px){.overview-page .overview-chart{width:140px;margin:14px auto 12px}}

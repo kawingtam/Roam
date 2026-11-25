@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+const {outputFiles}=await build({entryPoints:['web/review/errors.ts'],bundle:true,platform:'node',format:'esm',write:false});
+const {signInError,requestsError}=await import('data:text/javascript;base64,'+Buffer.from(outputFiles[0].text).toString('base64'));
+assert.match(signInError({code:'invalid_credentials',status:400}),/not accepted/);
+assert.match(signInError({name:'AuthRetryableFetchError',status:0}),/connect/);
+assert.match(signInError({status:503}),/temporarily unavailable/);
+assert.match(signInError({status:429}),/Too many/);
+assert.match(signInError({code:'email_not_confirmed'}),/Confirm/);
+assert.match(requestsError({code:'42501'}),/not authorized/);
+assert.match(requestsError({status:503}),/sign-in may have succeeded/);
+assert.match(requestsError({status:401}),/expired/);
+console.log('PASS: network/service/review errors are distinguished from incorrect passwords; authorization errors remain explicit.');

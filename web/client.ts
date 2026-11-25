@@ -1,6 +1,7 @@
 import {createClient} from '@supabase/supabase-js';
+import {connectionOnline} from './connectivity';
 import type {LedgerServices,User} from '../app/ledger';
-export const basePath='/Roam/';
+export const basePath=import.meta.env.BASE_URL;
 declare global {interface Window {ROAM_CONFIG?:{supabaseUrl:string,publishableKey:string}}}
 const config=window.ROAM_CONFIG;
 export const configured=!!config&&/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(config.supabaseUrl)&&(/^(sb_publishable_)/.test(config.publishableKey)||/^eyJ/.test(config.publishableKey));
@@ -13,7 +14,8 @@ async function data(payload?:unknown){
  const {data,error}=await supabase.rpc('roam_data',{payload:payload??null});
  if(error)throw new Error(error.message);return data;
 }
-export const services:LedgerServices={basePath,cacheName:'roam-pages-shell-v1',databaseName:'roam-pages-v1',data,
+export const services:LedgerServices={basePath,cacheName:'roam-pages-shell-v4',databaseName:'roam-pages-v1',data,
+ isOnline:connectionOnline,
  async uploadReceipt(id,photo){
   if(!supabase)throw new Error('Sign in first.');
   if(!['image/jpeg','image/png'].includes(photo.type)||photo.size>8*1024*1024)throw new Error('Use a JPEG or PNG receipt smaller than 8 MB.');

@@ -57,3 +57,11 @@ yarn-error.log*
 # Supabase local credentials and branch state
 /supabase/.temp/
 /supabase/.branches/
+
+# Native builds remain local.
+/android/
+/android-dist/
+/releases/
+/capacitor.config.ts
+*.apk
+*.aab

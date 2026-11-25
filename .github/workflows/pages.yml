@@ -22,6 +22,10 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: node scripts/check-pages-config.mjs
       - run: node tests/supabase.mjs
+      - run: node tests/registration.mjs
+      - run: node tests/account-review.mjs
+      - run: node tests/registration-email.mjs
+      - run: node tests/review-errors.mjs
       - run: npm run build:pages
       - run: node tests/pages.mjs
       - uses: actions/configure-pages@v5
